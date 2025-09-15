@@ -1,159 +1,79 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <title>Ricettario Internazionale</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-        header { background-color: #d35400; color: white; padding: 20px; text-align: center; font-size: 24px; letter-spacing: 1px; }
-        .search-bar { display: flex; gap: 10px; justify-content: center; background: white; padding: 15px; }
-        select, input, button { padding: 8px; font-size: 14px; }
-        #results { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; padding: 20px; }
-        .card { background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 15px; max-width: 320px; }
-        .card img { width: 100%; border-radius: 10px; }
-        h3 { margin-top: 10px; }
-        ul { padding-left: 18px; }
-        .flag { font-size: 20px; }
-        .pdf-btn { background: #27ae60; color: white; border: none; padding: 8px; margin-top: 5px; cursor: pointer; border-radius: 5px;}
-        .pdf-btn:hover { background: #1e8449; }
-        p { white-space: pre-line; font-size: 14px; }
-    </style>
-</head>
-<body>
-
-<header>📖 Ricettario Internazionale</header>
-
-<div class="search-bar">
-    <select id="category">
-        <option value="">-- Seleziona categoria --</option>
-    </select>
-    <input type="text" id="query" placeholder="Cerca per nome...">
-    <button id="search">🔍 Cerca</button>
-</div>
-
-<div id="results"></div>
-
-<script>
-const resultsDiv = document.getElementById('results');
-const categorySelect = document.getElementById('category');
-
-// Carica le categorie all'avvio
-fetch('https://www.themealdb.com/api/json/v1/1/list.php?c=list')
-    .then(res => res.json())
-    .then(data => {
-        data.meals.forEach(cat => {
-            const opt = document.createElement('option');
-            opt.value = cat.strCategory;
-            opt.textContent = cat.strCategory;
-            categorySelect.appendChild(opt);
-        });
-    });
-
-// Mappa bandiere semplici in base all'area
-const flagMap = {
-    "Italian": "🇮🇹",
-    "American": "🇺🇸",
-    "British": "🇬🇧",
-    "French": "🇫🇷",
-    "Mexican": "🇲🇽",
-    "Chinese": "🇨🇳",
-    "Japanese": "🇯🇵",
-    "Indian": "🇮🇳",
-    "Spanish": "🇪🇸",
-    "Greek": "🇬🇷",
-    "Thai": "🇹🇭",
-    "Moroccan": "🇲🇦",
-    "Unknown": "🏳️"
-};
-
-// Funzione cerca
-document.getElementById('search').addEventListener('click', () => {
-    const q = document.getElementById('query').value.trim();
-    const cat = categorySelect.value;
-
-    if(cat && !q){
-        // cerca per categoria
-        fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${encodeURIComponent(cat)}`)
-            .then(res => res.json())
-            .then(data => {
-                resultsDiv.innerHTML = '';
-                if(data.meals){
-                    data.meals.forEach(meal => {
-                        // Recupera dettagli completi della ricetta
-                        fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`)
-                            .then(res => res.json())
-                            .then(detail => showMeal(detail.meals[0]));
-                    });
-                } else {
-                    resultsDiv.textContent = "❌ Nessuna ricetta trovata.";
-                }
-            });
-    } else if(q){
-        // cerca per nome
-        fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(q)}`)
-            .then(res => res.json())
-            .then(data => {
-                resultsDiv.innerHTML = '';
-                if(data.meals){
-                    data.meals.forEach(meal => {
-                        showMeal(meal);
-                    });
-                } else {
-                    resultsDiv.textContent = "❌ Nessuna ricetta trovata.";
-                }
-            });
-    } else {
-        alert("Inserisci un nome o seleziona una categoria 📌");
-    }
-});
-
-function showMeal(meal){
-    const card = document.createElement('div');
-    card.className = 'card';
-
-    // ingredienti
-    const ingredients = [];
-    for(let i=1; i<=20; i++){
-        const ing = meal[`strIngredient${i}`];
-        const measure = meal[`strMeasure${i}`];
-        if(ing && ing.trim() !== ''){
-            ingredients.push(`${ing} - ${measure}`);
-        }
-    }
-
-    const flag = flagMap[meal.strArea] || "🏳️";
-
-    card.innerHTML = `
-        <img src="${meal.strMealThumb}" alt="${meal.strMeal}">
-        <h3>${meal.strMeal} <span class="flag">${flag}</span></h3>
-        <ul>${ingredients.map(i => `<li>${i}</li>`).join('')}</ul>
-        <p>${meal.strInstructions}</p>
-        <button class="pdf-btn">📄 Esporta PDF</button>
-    `;
-
-    // Bottone PDF
-    card.querySelector('.pdf-btn').addEventListener('click', () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text(meal.strMeal, 10, 10);
-        doc.setFontSize(12);
-        doc.text(`Origine: ${meal.strArea}`, 10, 20);
-        doc.text("Ingredienti:", 10, 30);
-        ingredients.forEach((ing, idx) => {
-            doc.text(`- ${ing}`, 10, 40 + (idx*7));
-        });
-        let yOffset = 40 + ingredients.length*7 + 10;
-        doc.text("Preparazione:", 10, yOffset);
-        let splitted = doc.splitTextToSize(meal.strInstructions, 180);
-        doc.text(splitted, 10, yOffset + 10);
-        doc.save(`${meal.strMeal}.pdf`);
-    });
-
-    resultsDiv.appendChild(card);
+/* Stile card generico */
+.card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
-</script>
 
-</body>
-</html>
+/* Immagini responsive */
+.card img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+/* Titolo ricetta */
+.card h3 {
+    margin: 0.3rem 0;
+    font-size: 1.4rem;
+}
+
+/* Lista ingredienti */
+.card ul {
+    padding-left: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+/* Istruzioni: scrollabile su mobile */
+.card p {
+    line-height: 1.4;
+    font-size: 1rem;
+    white-space: pre-line;
+}
+
+/* Bottone PDF */
+.card .pdf-btn {
+    background-color: #ff7043;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.card .pdf-btn:hover {
+    background-color: #e85c30;
+}
+
+/* Mobile: adattamento */
+@media (max-width: 600px) {
+    .card {
+        padding: 0.8rem;
+    }
+    .card h3 {
+        font-size: 1.2rem;
+    }
+    .card p {
+        font-size: 0.9rem;
+        max-height: 200px; /* Limita altezza testo */
+        overflow-y: auto; /* Scroll se troppo lungo */
+    }
+    .card ul {
+        font-size: 0.9rem;
+    }
+    .search-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-bar select,
+    .search-bar input,
+    .search-bar button {
+        width: 100%;
+    }
+}
