@@ -1,3 +1,80 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 Ricettario Internazionale</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa;
+            color: #333;
+        }
+
+        header {
+            background-color: #ff7043;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .search-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1rem;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            justify-content: center;
+        }
+
+        .search-bar select,
+        .search-bar input,
+        .search-bar button {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .search-bar button {
+            background-color: #ff7043;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .search-bar button:hover {
+            background-color: #e85c30;
+        }
+
+        #results {
+            padding: 1rem;
+            min-height: 200px;
+        }
+
+        /* Responsive: per schermi piccoli */
+        @media (max-width: 600px) {
+            header {
+                font-size: 1.2rem;
+                padding: 0.8rem;
+            }
+            .search-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-bar select,
+            .search-bar input,
+            .search-bar button {
+                width: 100%;
+            }
+        }
 /* Stile card generico */
 .card {
     background: #fff;
@@ -77,3 +154,145 @@
         width: 100%;
     }
 }
+    </style>
+</head>
+<body>
+
+    <header>📖 Ricettario Internazionale</header>
+
+    <div class="search-bar">
+        <select id="category">
+            <option value="">-- Seleziona categoria --</option>
+        </select>
+        <input type="text" id="query" placeholder="Cerca per nome...">
+        <button id="search">🔍 Cerca</button>
+    </div>
+
+    <div id="results">
+        <!-- Risultati della ricerca -->
+    </div>
+  
+
+<script>
+const resultsDiv = document.getElementById('results');
+const categorySelect = document.getElementById('category');
+
+// Carica le categorie all'avvio
+fetch('https://www.themealdb.com/api/json/v1/1/list.php?c=list')
+    .then(res => res.json())
+    .then(data => {
+        data.meals.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat.strCategory;
+            opt.textContent = cat.strCategory;
+            categorySelect.appendChild(opt);
+        });
+    });
+
+// Mappa bandiere semplici in base all'area
+const flagMap = {
+    "Italian": "🇮🇹",
+    "American": "🇺🇸",
+    "British": "🇬🇧",
+    "French": "🇫🇷",
+    "Mexican": "🇲🇽",
+    "Chinese": "🇨🇳",
+    "Japanese": "🇯🇵",
+    "Indian": "🇮🇳",
+    "Spanish": "🇪🇸",
+    "Greek": "🇬🇷",
+    "Thai": "🇹🇭",
+    "Moroccan": "🇲🇦",
+    "Unknown": "🏳️"
+};
+
+// Funzione cerca
+document.getElementById('search').addEventListener('click', () => {
+    const q = document.getElementById('query').value.trim();
+    const cat = categorySelect.value;
+
+    if(cat && !q){
+        // cerca per categoria
+        fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${encodeURIComponent(cat)}`)
+            .then(res => res.json())
+            .then(data => {
+                resultsDiv.innerHTML = '';
+                if(data.meals){
+                    data.meals.forEach(meal => {
+                        // Recupera dettagli completi della ricetta
+                        fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`)
+                            .then(res => res.json())
+                            .then(detail => showMeal(detail.meals[0]));
+                    });
+                } else {
+                    resultsDiv.textContent = "❌ Nessuna ricetta trovata.";
+                }
+            });
+    } else if(q){
+        // cerca per nome
+        fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(q)}`)
+            .then(res => res.json())
+            .then(data => {
+                resultsDiv.innerHTML = '';
+                if(data.meals){
+                    data.meals.forEach(meal => {
+                        showMeal(meal);
+                    });
+                } else {
+                    resultsDiv.textContent = "❌ Nessuna ricetta trovata.";
+                }
+            });
+    } else {
+        alert("Inserisci un nome o seleziona una categoria 📌");
+    }
+});
+
+function showMeal(meal){
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    // ingredienti
+    const ingredients = [];
+    for(let i=1; i<=20; i++){
+        const ing = meal[`strIngredient${i}`];
+        const measure = meal[`strMeasure${i}`];
+        if(ing && ing.trim() !== ''){
+            ingredients.push(`${ing} - ${measure}`);
+        }
+    }
+
+    const flag = flagMap[meal.strArea] || "🏳️";
+
+    card.innerHTML = `
+        <img src="${meal.strMealThumb}" alt="${meal.strMeal}">
+        <h3>${meal.strMeal} <span class="flag">${flag}</span></h3>
+        <ul>${ingredients.map(i => `<li>${i}</li>`).join('')}</ul>
+        <p>${meal.strInstructions}</p>
+        <button class="pdf-btn">📄 Esporta PDF</button>
+    `;
+
+    // Bottone PDF
+    card.querySelector('.pdf-btn').addEventListener('click', () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text(meal.strMeal, 10, 10);
+        doc.setFontSize(12);
+        doc.text(`Origine: ${meal.strArea}`, 10, 20);
+        doc.text("Ingredienti:", 10, 30);
+        ingredients.forEach((ing, idx) => {
+            doc.text(`- ${ing}`, 10, 40 + (idx*7));
+        });
+        let yOffset = 40 + ingredients.length*7 + 10;
+        doc.text("Preparazione:", 10, yOffset);
+        let splitted = doc.splitTextToSize(meal.strInstructions, 180);
+        doc.text(splitted, 10, yOffset + 10);
+        doc.save(`${meal.strMeal}.pdf`);
+    });
+
+    resultsDiv.appendChild(card);
+}
+</script>
+
+</body>
+</html>
