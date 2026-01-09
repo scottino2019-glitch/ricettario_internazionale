@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Il Mio Sito</title>
+  <style>
+* { margin: 0; padding: 0; box-sizing: border-box; 
+} 
+body { 
+font-family: 'Space Grotesk', sans-serif; 
+background: #f0fdfa; 
+color: #333; 
+line-height: 1.6; 
+} 
+.container { 
+max-width: 1200px; 
+margin: 0 auto; 
+padding: 0 20px; 
+} 
+header { 
+background: linear-gradient(135deg, #14b8a6, #0f766e); 
+color: white; 
+padding: 80px 20px; 
+text-align: center; 
+position: relative; 
+min-height: 450px; 
+background-size: cover; 
+background-position: center; 
+} 
+header h1 { 
+font-size: 3.5em; 
+font-weight: 700; 
+margin-bottom: 20px; 
+text-transform: uppercase; 
+letter-spacing: 3px; 
+} 
+header p { 
+font-size: 1.4em; 
+opacity: 0.95; 
+max-width: 600px; 
+margin: 0 auto; 
+} 
+section { 
+padding: 80px 20px; 
+} 
+section:nth-child(even) { 
+background: transparent; 
+} 
+section h2 { 
+font-size: 2.8em; 
+color: #0f766e;
+ margin-bottom: 50px; 
+text-align: center; 
+position: relative; 
+text-transform: uppercase; 
+} 
+section h2::after { 
+content: ""; display: 
+block; width: 80px; 
+height: 4px;
+background: #14b8a6;
+ margin: 20px auto 0; 
+} 
+.grid { 
+display: grid; 
+grid-template-columns: 
+repeat(auto-fit, minmax(320px, 1fr)); gap: 35px;
+ margin-top: 40px; 
+} 
+.card {
+background: white;
+ padding: 40px; 
+border-radius: 5px; 
+box-shadow: 0 8px 20px rgba(0,0,0,0.2); 
+transition: all 0.3s;
+ position: relative; 
+border-radius: 25px; 
+overflow: hidden;
+background-size: cover;
+ background-position: center;
+ min-height: 300px; 
+display: flex; 
+flex-direction: column; 
+justify-content: flex-end;
+ color: white; 
+text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
+border: 3px solid #14b8a6; 
+border-color: #14b8a6; 
+}
+.card:hover { 
+transform: translateY(-12px); 
+box-shadow: 0 15px 50px rgba(0,0,0,0.2); 
+} 
+.card h3 {
+ font-size: 1.9em; 
+color: #14b8a6;
+ margin-bottom: 15px; 
+} 
+.card p { 
+color: rgba(255,255,255,0.95); font-size: 1.1em; line-height: 1.7;
+ } 
+.cta {
+background: #14b8a6;
+color: white;
+ padding: 15px 40px;
+ border: none; 
+border-radius: 0; 
+font-size: 1.2em;
+ font-weight: 600; 
+cursor: pointer; 
+transition: all 0.3s; 
+display: inline-block; 
+text-decoration: none; 
+margin-top: 20px; 
+text-transform: uppercase;
+ letter-spacing: 1px;
+ } 
+.cta:hover {
+ background: #0f766e;
+ transform: scale(1.05); 
+box-shadow: 0 8px 20px rgba(0,0,0,0.2); 
+} 
+ .card {
+ background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)); 
+}
+ @media (max-width: 768px) { 
+header h1 {
+ font-size: 2.2em;
+ } 
+section h2 {
+ font-size: 2em; 
+} 
+ .grid {
+ grid-template-columns: 1fr; }
+ } 
+  </style>
+</head>
+<body>
+<!DOCTYPE html> <html lang="it"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Viaggi - Il Mio Sito</title> <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"> 
+</head>
+<body>
+<header> <h1>🍳 La mia cucina</h1> <p>Ricettario e app per salvare le ricette</p> </header>
+<section id="destinazioni"> <div class="container"> <div class="grid"> <div class="card"> <h3>🍽️Ricette</h3> <p> Motore di ricerca di ricette di tutto il mondo.</p> <button class="cta"><a hrf="ricettario.html">Vai</a></button>
+</div>
+<div class="card"> <h3>🧂Ricettario</h3> <p>App per salvare le ricette.</p> <button class="cta"><a hrf="recipe-app.html">Vai</a></button>
+</div>
+</div></div>
+</section></body></html>
+  <script>
+console.log('Ciao da JavaScript!');
+  </script>
+</body>
+</html>
