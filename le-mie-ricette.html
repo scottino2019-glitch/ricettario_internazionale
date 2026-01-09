@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="it" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe Collection</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    .recipe-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .recipe-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+    
+    .delete-btn {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .recipe-card:hover .delete-btn {
+      opacity: 1;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .timer-pulse {
+      animation: pulse 1s ease-in-out infinite;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto" style="background-color: #fef3e2; font-family: 'Georgia', serif;">
+   <div class="max-w-6xl mx-auto px-6 py-8"><!-- Header -->
+    <header class="text-center mb-12">
+     <h1 id="app-title" class="text-5xl font-bold mb-3" style="color: #8b4513;">Le Mie Ricette</h1>
+     <p class="text-lg" style="color: #a0522d;">La tua collezione personale di delizie culinarie</p>
+    </header><!-- Add Recipe Button -->
+    <div class="text-center mb-8"><button id="add-recipe-btn" class="px-8 py-4 text-lg font-semibold rounded-full shadow-lg transition-all duration-200 hover:shadow-xl" style="background-color: #d2691e; color: #ffffff;"> ✨ <span id="add-button-text">Aggiungi Nuova Ricetta</span> </button>
+    </div><!-- Recipes Grid -->
+    <div id="recipes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- Recipe cards will be inserted here -->
+    </div><!-- Empty State -->
+    <div id="empty-state" class="text-center py-16 hidden">
+     <div class="text-6xl mb-4">
+      🍳
+     </div>
+     <p id="empty-state-text" class="text-xl" style="color: #a0522d;">Nessuna ricetta ancora. Inizia ad aggiungerne una!</p>
+    </div>
+   </div><!-- Add/Edit Recipe Modal -->
+   <div id="recipe-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90%] overflow-y-auto">
+     <div class="p-8">
+      <div class="flex justify-between items-center mb-6">
+       <h2 id="modal-title" class="text-3xl font-bold" style="color: #8b4513;">Nuova Ricetta</h2><button id="close-modal" class="text-3xl hover:opacity-70 transition-opacity" style="color: #a0522d;">×</button>
+      </div>
+      <form id="recipe-form">
+       <div class="space-y-6">
+        <div><label for="recipe-name" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Nome della Ricetta</label> <input type="text" id="recipe-name" required class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+         <div><label for="recipe-category" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Categoria</label> <select id="recipe-category" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;"> <option value="Antipasti">Antipasti</option> <option value="Primi">Primi</option> <option value="Secondi">Secondi</option> <option value="Contorni">Contorni</option> <option value="Dolci">Dolci</option> <option value="Altro">Altro</option> </select>
+         </div>
+         <div><label for="recipe-difficulty" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Difficoltà</label> <select id="recipe-difficulty" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;"> <option value="Facile">😊 Facile</option> <option value="Media">😐 Media</option> <option value="Difficile">😰 Difficile</option> </select>
+         </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+         <div><label for="recipe-time" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Preparazione (min)</label> <input type="number" id="recipe-time" required min="1" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;">
+         </div>
+         <div><label for="recipe-cooking-time" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Cottura (min)</label> <input type="number" id="recipe-cooking-time" min="0" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;">
+         </div>
+         <div><label for="recipe-servings" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Porzioni</label> <input type="number" id="recipe-servings" required min="1" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;">
+         </div>
+        </div>
+        <div><label for="recipe-ingredients" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Ingredienti</label>
+         <p class="text-xs mb-2" style="color: #a0522d;">Usa numeri per quantità scalabili (es: "200g farina", "3 uova"). Uno per riga.</p><textarea id="recipe-ingredients" required rows="6" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;" placeholder="200g farina
+3 uova
+100ml latte
+1 pizzico di sale"></textarea>
+        </div>
+        <div><label for="recipe-instructions" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Istruzioni</label> <textarea id="recipe-instructions" required rows="8" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;" placeholder="Descrivi i passaggi della preparazione..."></textarea>
+        </div>
+        <div><label for="recipe-notes" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Note e Consigli (opzionale)</label> <textarea id="recipe-notes" rows="3" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;" placeholder="Consigli di presentazione, varianti, abbinamenti..."></textarea>
+        </div>
+       </div>
+       <div class="flex gap-4 mt-8"><button type="submit" id="save-recipe-btn" class="flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg" style="background-color: #d2691e; color: #ffffff;"> Salva Ricetta </button> <button type="button" id="cancel-btn" class="flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200" style="background-color: #f5deb3; color: #8b4513;"> Annulla </button>
+       </div>
+      </form>
+     </div>
+    </div>
+   </div><!-- View Recipe Modal -->
+   <div id="view-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90%] overflow-y-auto">
+     <div class="p-8">
+      <div class="flex justify-between items-start mb-6">
+       <div class="flex-1">
+        <h2 id="view-name" class="text-4xl font-bold mb-2" style="color: #8b4513;"></h2>
+        <div class="flex flex-wrap gap-3 text-sm mb-3" style="color: #a0522d;"><span id="view-category" class="px-3 py-1 rounded-full" style="background-color: #f5deb3;"></span> <span id="view-difficulty" class="px-3 py-1 rounded"></span> <span>⏱️ Prep: <span id="view-time"></span> min</span> <span id="view-cooking-time-container" class="hidden">🔥 Cottura: <span id="view-cooking-time"></span> min</span>
+        </div>
+       </div><button id="close-view-modal" class="text-3xl hover:opacity-70 transition-opacity ml-4" style="color: #a0522d;">×</button>
+      </div>
+      <div class="space-y-6"><!-- Portion Scaler -->
+       <div class="p-4 rounded-lg" style="background-color: #fff8f0; border: 2px solid #f5deb3;">
+        <div class="flex items-center justify-between mb-3"><span class="font-semibold" style="color: #8b4513;">👥 Adatta porzioni:</span>
+         <div class="flex items-center gap-3"><button id="decrease-portions" class="w-10 h-10 rounded-full font-bold text-xl hover:opacity-80 transition-opacity" style="background-color: #d2691e; color: #ffffff;">−</button> <span id="current-portions" class="text-2xl font-bold min-w-[3rem] text-center" style="color: #8b4513;">4</span> <button id="increase-portions" class="w-10 h-10 rounded-full font-bold text-xl hover:opacity-80 transition-opacity" style="background-color: #d2691e; color: #ffffff;">+</button>
+         </div>
+        </div>
+        <div class="text-sm text-center" style="color: #a0522d;">
+         Ricetta originale per: <span id="original-portions" class="font-semibold">4</span> porzioni
+        </div>
+       </div><!-- Timer -->
+       <div id="timer-section" class="p-4 rounded-lg" style="background-color: #fff8f0; border: 2px solid #f5deb3;">
+        <div class="flex items-center justify-between mb-3"><span class="font-semibold" style="color: #8b4513;">⏱️ Timer Cottura</span>
+         <div class="flex items-center gap-3"><select id="timer-minutes" class="px-3 py-2 rounded border-2" style="border-color: #d2691e; background-color: #ffffff;"> </select> <button id="start-timer" class="px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity" style="background-color: #d2691e; color: #ffffff;"> Avvia </button>
+         </div>
+        </div>
+        <div id="timer-display" class="hidden">
+         <div class="text-center mb-3">
+          <div id="timer-countdown" class="text-5xl font-bold" style="color: #d2691e;">
+           00:00
+          </div>
+          <div id="timer-status" class="text-sm mt-2" style="color: #a0522d;">
+           Timer attivo
+          </div>
+         </div>
+         <div class="flex gap-3"><button id="pause-timer" class="flex-1 py-2 rounded-lg font-semibold" style="background-color: #FFD700; color: #333333;"> ⏸️ Pausa </button> <button id="stop-timer" class="flex-1 py-2 rounded-lg font-semibold" style="background-color: #cd5c5c; color: #ffffff;"> ⏹️ Stop </button>
+         </div>
+        </div>
+       </div>
+       <div>
+        <h3 class="text-xl font-bold mb-3" style="color: #8b4513;">🥘 Ingredienti</h3>
+        <ul id="view-ingredients" class="space-y-2 pl-5" style="color: #6b4423;"></ul>
+       </div>
+       <div>
+        <h3 class="text-xl font-bold mb-3" style="color: #8b4513;">📝 Istruzioni</h3>
+        <div id="view-instructions" class="whitespace-pre-wrap leading-relaxed" style="color: #6b4423;"></div>
+       </div>
+       <div id="view-notes-section" class="hidden">
+        <h3 class="text-xl font-bold mb-3" style="color: #8b4513;">💡 Note e Consigli</h3>
+        <div id="view-notes" class="whitespace-pre-wrap leading-relaxed p-4 rounded-lg" style="color: #6b4423; background-color: #fff8f0;"></div>
+       </div>
+      </div>
+      <div class="flex gap-4 mt-8"><button id="edit-from-view-btn" class="flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg" style="background-color: #d2691e; color: #ffffff;"> ✏️ Modifica </button> <button id="delete-from-view-btn" class="flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200" style="background-color: #cd5c5c; color: #ffffff;"> 🗑️ Elimina </button>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      app_title: "Le Mie Ricette",
+      add_button_text: "Aggiungi Nuova Ricetta",
+      empty_state_text: "Nessuna ricetta ancora. Inizia ad aggiungerne una!",
+      background_color: "#fef3e2",
+      card_color: "#ffffff",
+      text_color: "#8b4513",
+      primary_button_color: "#d2691e",
+      secondary_color: "#f5deb3",
+      font_family: "Georgia",
+      font_size: 16
+    };
+
+    let recipes = [];
+    let editingRecipeId = null;
+    let currentRecipe = null;
+    let currentPortions = 1;
+    let originalPortions = 1;
+    
+    // Timer state
+    let timerInterval = null;
+    let timerSeconds = 0;
+    let timerPaused = false;
+
+    function loadRecipes() {
+      const stored = localStorage.getItem('recipes');
+      if (stored) {
+        recipes = JSON.parse(stored);
+      }
+    }
+
+    function saveRecipes() {
+      localStorage.setItem('recipes', JSON.stringify(recipes));
+    }
+
+    function showToast(message, isError = false) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      toast.style.backgroundColor = isError ? '#cd5c5c' : '#90EE90';
+      toast.style.color = isError ? '#ffffff' : '#2d5016';
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function renderRecipes() {
+      const container = document.getElementById('recipes-container');
+      const emptyState = document.getElementById('empty-state');
+      
+      if (recipes.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      
+      emptyState.classList.add('hidden');
+      
+      container.innerHTML = recipes.map(recipe => {
+        const difficultyColors = {
+          'Facile': '#90EE90',
+          'Media': '#FFD700',
+          'Difficile': '#FF6347'
+        };
+        
+        return `
+        <div class="recipe-card fade-in bg-white rounded-xl shadow-md p-6 relative cursor-pointer" data-id="${recipe.id}" style="background-color: ${window.elementSdk?.config?.card_color || defaultConfig.card_color};">
+          <button class="delete-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity" style="background-color: #cd5c5c; color: #ffffff;" onclick="confirmDelete('${recipe.id}', event)">
+            ×
+          </button>
+          
+          <h3 class="text-2xl font-bold mb-2 pr-8" style="color: ${window.elementSdk?.config?.text_color || defaultConfig.text_color};">${recipe.name}</h3>
+          
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-sm px-3 py-1 rounded-full" style="background-color: ${window.elementSdk?.config?.secondary_color || defaultConfig.secondary_color}; color: ${window.elementSdk?.config?.text_color || defaultConfig.text_color};">${recipe.category}</span>
+            <span class="text-xs px-2 py-1 rounded" style="background-color: ${difficultyColors[recipe.difficulty]}; color: ${recipe.difficulty === 'Difficile' ? '#ffffff' : '#333333'};">
+              ${recipe.difficulty}
+            </span>
+          </div>
+          
+          <div class="flex flex-wrap gap-3 text-sm mb-4" style="color: #a0522d;">
+            <span>⏱️ ${recipe.time}min</span>
+            ${recipe.cookingTime ? `<span>🔥 ${recipe.cookingTime}min</span>` : ''}
+            <span>👥 ${recipe.servings}</span>
+          </div>
+          
+          <div class="text-sm" style="color: #6b4423;">
+            <strong>Ingredienti:</strong> ${recipe.ingredients.split('\n').filter(i => i.trim()).length}
+          </div>
+        </div>
+      `}).join('');
+      
+      document.querySelectorAll('.recipe-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (!e.target.closest('button')) {
+            viewRecipe(card.dataset.id);
+          }
+        });
+      });
+    }
+
+    function openModal(recipeId = null) {
+      const modal = document.getElementById('recipe-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const form = document.getElementById('recipe-form');
+      
+      editingRecipeId = recipeId;
+      
+      if (recipeId) {
+        const recipe = recipes.find(r => r.id === recipeId);
+        modalTitle.textContent = 'Modifica Ricetta';
+        document.getElementById('recipe-name').value = recipe.name;
+        document.getElementById('recipe-category').value = recipe.category;
+        document.getElementById('recipe-time').value = recipe.time;
+        document.getElementById('recipe-cooking-time').value = recipe.cookingTime || '';
+        document.getElementById('recipe-servings').value = recipe.servings;
+        document.getElementById('recipe-ingredients').value = recipe.ingredients;
+        document.getElementById('recipe-instructions').value = recipe.instructions;
+        document.getElementById('recipe-difficulty').value = recipe.difficulty;
+        document.getElementById('recipe-notes').value = recipe.notes || '';
+      } else {
+        modalTitle.textContent = 'Nuova Ricetta';
+        form.reset();
+      }
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('recipe-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      editingRecipeId = null;
+    }
+    
+    // Parse ingredient and scale it
+    function scaleIngredient(ingredient, scale) {
+      // Match patterns like "200g", "3 cucchiai", "1.5 kg", etc.
+      const numberPattern = /(\d+\.?\d*)\s*([a-zA-Z]*)\s+(.*)/;
+      const match = ingredient.match(numberPattern);
+      
+      if (match) {
+        const amount = parseFloat(match[1]);
+        const unit = match[2];
+        const rest = match[3];
+        const scaledAmount = (amount * scale).toFixed(1).replace(/\.0$/, '');
+        return `${scaledAmount}${unit} ${rest}`;
+      }
+      
+      // If no number found, return as is
+      return ingredient;
+    }
+    
+    function updateIngredientDisplay() {
+      const ingredientsList = document.getElementById('view-ingredients');
+      const scale = currentPortions / originalPortions;
+      
+      ingredientsList.innerHTML = currentRecipe.ingredients.split('\n')
+        .filter(i => i.trim())
+        .map(i => {
+          const scaled = scaleIngredient(i.trim(), scale);
+          return `<li style="color: #6b4423;">• ${scaled}</li>`;
+        })
+        .join('');
+    }
+    
+    function updatePortions(change) {
+      const newPortions = currentPortions + change;
+      if (newPortions >= 1 && newPortions <= 99) {
+        currentPortions = newPortions;
+        document.getElementById('current-portions').textContent = currentPortions;
+        updateIngredientDisplay();
+      }
+    }
+    
+    // Timer functions
+    function setupTimer(cookingTime, prepTime) {
+      const timerSelect = document.getElementById('timer-minutes');
+      timerSelect.innerHTML = '';
+      
+      const times = [];
+      if (cookingTime) times.push({ label: `Cottura (${cookingTime} min)`, value: cookingTime });
+      if (prepTime) times.push({ label: `Preparazione (${prepTime} min)`, value: prepTime });
+      const total = (cookingTime || 0) + (prepTime || 0);
+      if (total > 0) times.push({ label: `Totale (${total} min)`, value: total });
+      
+      // Add custom times
+      [5, 10, 15, 20, 30, 45, 60].forEach(min => {
+        if (!times.find(t => t.value === min)) {
+          times.push({ label: `${min} minuti`, value: min });
+        }
+      });
+      
+      times.sort((a, b) => a.value - b.value);
+      times.forEach(time => {
+        const option = document.createElement('option');
+        option.value = time.value;
+        option.textContent = time.label;
+        timerSelect.appendChild(option);
+      });
+      
+      if (cookingTime) {
+        timerSelect.value = cookingTime;
+      }
+    }
+    
+    function startTimer() {
+      const minutes = parseInt(document.getElementById('timer-minutes').value);
+      if (!minutes) return;
+      
+      timerSeconds = minutes * 60;
+      timerPaused = false;
+      
+      document.getElementById('timer-display').classList.remove('hidden');
+      document.getElementById('start-timer').disabled = true;
+      document.getElementById('start-timer').style.opacity = '0.5';
+      
+      updateTimerDisplay();
+      
+      timerInterval = setInterval(() => {
+        if (!timerPaused && timerSeconds > 0) {
+          timerSeconds--;
+          updateTimerDisplay();
+          
+          if (timerSeconds === 0) {
+            stopTimer();
+            showToast('⏰ Timer completato! Il tuo piatto è pronto!');
+            // Play notification (visual only since audio is not supported)
+            document.getElementById('timer-countdown').classList.add('timer-pulse');
+            setTimeout(() => {
+              document.getElementById('timer-countdown').classList.remove('timer-pulse');
+            }, 3000);
+          }
+        }
+      }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timerSeconds / 60);
+      const seconds = timerSeconds % 60;
+      document.getElementById('timer-countdown').textContent = 
+        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      
+      document.getElementById('timer-status').textContent = 
+        timerPaused ? '⏸️ In pausa' : '⏱️ Timer attivo';
+    }
+    
+    function pauseTimer() {
+      timerPaused = !timerPaused;
+      document.getElementById('pause-timer').textContent = timerPaused ? '▶️ Riprendi' : '⏸️ Pausa';
+    }
+    
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerSeconds = 0;
+      timerPaused = false;
+      
+      document.getElementById('timer-display').classList.add('hidden');
+      document.getElementById('start-timer').disabled = false;
+      document.getElementById('start-timer').style.opacity = '1';
+      document.getElementById('pause-timer').textContent = '⏸️ Pausa';
+    }
+
+    function viewRecipe(recipeId) {
+      const recipe = recipes.find(r => r.id === recipeId);
+      if (!recipe) return;
+      
+      currentRecipe = recipe;
+      originalPortions = recipe.servings;
+      currentPortions = recipe.servings;
+      
+      document.getElementById('view-name').textContent = recipe.name;
+      document.getElementById('view-category').textContent = recipe.category;
+      
+      const difficultyEl = document.getElementById('view-difficulty');
+      const difficultyColors = {
+        'Facile': '#90EE90',
+        'Media': '#FFD700',
+        'Difficile': '#FF6347'
+      };
+      difficultyEl.textContent = recipe.difficulty;
+      difficultyEl.style.backgroundColor = difficultyColors[recipe.difficulty];
+      difficultyEl.style.color = recipe.difficulty === 'Difficile' ? '#ffffff' : '#333333';
+      
+      document.getElementById('view-time').textContent = recipe.time;
+      
+      if (recipe.cookingTime) {
+        document.getElementById('view-cooking-time').textContent = recipe.cookingTime;
+        document.getElementById('view-cooking-time-container').classList.remove('hidden');
+      } else {
+        document.getElementById('view-cooking-time-container').classList.add('hidden');
+      }
+      
+      document.getElementById('current-portions').textContent = currentPortions;
+      document.getElementById('original-portions').textContent = originalPortions;
+      
+      updateIngredientDisplay();
+      
+      document.getElementById('view-instructions').textContent = recipe.instructions;
+      
+      if (recipe.notes && recipe.notes.trim()) {
+        document.getElementById('view-notes').textContent = recipe.notes;
+        document.getElementById('view-notes-section').classList.remove('hidden');
+      } else {
+        document.getElementById('view-notes-section').classList.add('hidden');
+      }
+      
+      // Setup timer
+      setupTimer(recipe.cookingTime, recipe.time);
+      stopTimer(); // Reset any existing timer
+      
+      const viewModal = document.getElementById('view-modal');
+      viewModal.classList.remove('hidden');
+      viewModal.classList.add('flex');
+      
+      document.getElementById('edit-from-view-btn').onclick = () => {
+        closeViewModal();
+        openModal(recipeId);
+      };
+      
+      document.getElementById('delete-from-view-btn').onclick = () => {
+        closeViewModal();
+        confirmDelete(recipeId);
+      };
+    }
+
+    function closeViewModal() {
+      const modal = document.getElementById('view-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      stopTimer();
+      currentRecipe = null;
+    }
+
+    function confirmDelete(recipeId, event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      
+      const recipe = recipes.find(r => r.id === recipeId);
+      const card = document.querySelector(`[data-id="${recipeId}"]`);
+      
+      if (card) {
+        const deleteBtn = card.querySelector('.delete-btn');
+        const originalContent = deleteBtn.innerHTML;
+        
+        deleteBtn.innerHTML = '✓';
+        deleteBtn.style.backgroundColor = '#90EE90';
+        
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'absolute top-4 right-14 w-8 h-8 rounded-full flex items-center justify-center transition-opacity';
+        cancelBtn.style.backgroundColor = '#d3d3d3';
+        cancelBtn.style.color = '#333333';
+        cancelBtn.innerHTML = '×';
+        cancelBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteBtn.innerHTML = originalContent;
+          deleteBtn.style.backgroundColor = '#cd5c5c';
+          cancelBtn.remove();
+        };
+        
+        card.appendChild(cancelBtn);
+        
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteRecipe(recipeId);
+          cancelBtn.remove();
+        };
+      }
+    }
+
+    function deleteRecipe(recipeId) {
+      recipes = recipes.filter(r => r.id !== recipeId);
+      saveRecipes();
+      renderRecipes();
+      showToast('Ricetta eliminata');
+    }
+
+    function saveRecipe(event) {
+      event.preventDefault();
+      
+      const name = document.getElementById('recipe-name').value.trim();
+      const category = document.getElementById('recipe-category').value;
+      const time = parseInt(document.getElementById('recipe-time').value);
+      const cookingTime = parseInt(document.getElementById('recipe-cooking-time').value) || null;
+      const servings = parseInt(document.getElementById('recipe-servings').value);
+      const ingredients = document.getElementById('recipe-ingredients').value.trim();
+      const instructions = document.getElementById('recipe-instructions').value.trim();
+      const difficulty = document.getElementById('recipe-difficulty').value;
+      const notes = document.getElementById('recipe-notes').value.trim();
+      
+      if (editingRecipeId) {
+        const recipe = recipes.find(r => r.id === editingRecipeId);
+        recipe.name = name;
+        recipe.category = category;
+        recipe.time = time;
+        recipe.cookingTime = cookingTime;
+        recipe.servings = servings;
+        recipe.ingredients = ingredients;
+        recipe.instructions = instructions;
+        recipe.difficulty = difficulty;
+        recipe.notes = notes;
+        showToast('Ricetta aggiornata!');
+      } else {
+        recipes.push({
+          id: Date.now().toString(),
+          name,
+          category,
+          time,
+          cookingTime,
+          servings,
+          ingredients,
+          instructions,
+          difficulty,
+          notes
+        });
+        showToast('Ricetta aggiunta!');
+      }
+      
+      saveRecipes();
+      renderRecipes();
+      closeModal();
+    }
+
+    async function onConfigChange(config) {
+      document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
+      document.getElementById('add-button-text').textContent = config.add_button_text || defaultConfig.add_button_text;
+      document.getElementById('empty-state-text').textContent = config.empty_state_text || defaultConfig.empty_state_text;
+      
+      const appDiv = document.getElementById('app');
+      appDiv.style.backgroundColor = config.background_color || defaultConfig.background_color;
+      
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const fontSize = config.font_size || defaultConfig.font_size;
+      appDiv.style.fontFamily = `${fontFamily}, Georgia, serif`;
+      
+      document.getElementById('app-title').style.fontSize = `${fontSize * 3.125}px`;
+      document.getElementById('app-title').style.color = config.text_color || defaultConfig.text_color;
+      
+      const addBtn = document.getElementById('add-recipe-btn');
+      addBtn.style.backgroundColor = config.primary_button_color || defaultConfig.primary_button_color;
+      addBtn.style.fontSize = `${fontSize * 1.125}px`;
+      
+      renderRecipes();
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.card_color || defaultConfig.card_color,
+              set: (value) => {
+                config.card_color = value;
+                window.elementSdk.setConfig({ card_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_button_color || defaultConfig.primary_button_color,
+              set: (value) => {
+                config.primary_button_color = value;
+                window.elementSdk.setConfig({ primary_button_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['app_title', config.app_title || defaultConfig.app_title],
+          ['add_button_text', config.add_button_text || defaultConfig.add_button_text],
+          ['empty_state_text', config.empty_state_text || defaultConfig.empty_state_text]
+        ])
+      });
+    }
+
+    // Event Listeners
+    document.getElementById('add-recipe-btn').addEventListener('click', () => openModal());
+    document.getElementById('close-modal').addEventListener('click', closeModal);
+    document.getElementById('cancel-btn').addEventListener('click', closeModal);
+    document.getElementById('close-view-modal').addEventListener('click', closeViewModal);
+    document.getElementById('recipe-form').addEventListener('submit', saveRecipe);
+    
+    document.getElementById('decrease-portions').addEventListener('click', () => updatePortions(-1));
+    document.getElementById('increase-portions').addEventListener('click', () => updatePortions(1));
+    
+    document.getElementById('start-timer').addEventListener('click', startTimer);
+    document.getElementById('pause-timer').addEventListener('click', pauseTimer);
+    document.getElementById('stop-timer').addEventListener('click', stopTimer);
+
+    document.getElementById('recipe-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'recipe-modal') closeModal();
+    });
+
+    document.getElementById('view-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'view-modal') closeViewModal();
+    });
+
+    loadRecipes();
+    renderRecipes();
+    onConfigChange(defaultConfig);
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b82c4e6d34de898',t:'MTc2NzQ0NjE3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
