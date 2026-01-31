@@ -367,7 +367,7 @@ es. 400g spaghetti
      </div>
      <div class="p-6 border-t flex gap-3 justify-between"><button id="delete-recipe-btn" class="px-5 py-2.5 rounded-full font-medium text-red-600 border-2 border-red-200 hover:bg-red-50 transition-colors flex items-center gap-2">
        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-       </svg><span id="delete-btn-text">Elimina</span> </button> <button id="edit-recipe-btn" class="btn-primary px-5 py-2.5 rounded-full font-medium flex items-center gap-2">
+       </svg><span id="delete-btn-text">Elimina</span> </button> <button onclick="editCurrentRecipe()" class="btn-primary px-5 py-2.5 rounded-full font-medium flex items-center gap-2">
        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
        </svg> Modifica </button>
      </div>
@@ -817,7 +817,7 @@ es. 400g spaghetti
           
           if (timerSeconds === 0) {
             stopTimer();
-            showToast('⏰ Timer terminato!');
+            showToast('��� Timer terminato!');
           }
         }
       }, 1000);
@@ -988,15 +988,19 @@ es. 400g spaghetti
       }, 3000);
     }
 
+    // Function for edit button
+    function editCurrentRecipe() {
+      if (!currentRecipe) return;
+      const recipeToEdit = currentRecipe;
+      closeViewModal();
+      openModal(recipeToEdit);
+    }
+
     // Event Listeners
     document.getElementById('add-recipe-btn').addEventListener('click', () => openModal());
     document.getElementById('add-first-recipe-btn').addEventListener('click', () => openModal());
     document.getElementById('recipe-form').addEventListener('submit', saveRecipe);
     document.getElementById('delete-recipe-btn').addEventListener('click', deleteRecipe);
-    document.getElementById('edit-recipe-btn').addEventListener('click', () => {
-      closeViewModal();
-      openModal(currentRecipe);
-    });
     
     // New feature event listeners
     document.getElementById('decrease-servings').addEventListener('click', () => changeServings(-1));
@@ -1014,5 +1018,5 @@ es. 400g spaghetti
 
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c6b5b2e0515ed25',t:'MTc2OTg4NTAyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c6b982be3b1ed9e',t:'MTc2OTg4NzUyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
