@@ -3,424 +3,811 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recipe Collection</title>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Ricettario Digitale</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Source+Sans+3:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       box-sizing: border-box;
+      margin: 0;
+      font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      height: 100%;
+      width: 100%;
+    }
+    html { height: 100%; width: 100%; }
+    
+    .font-display { font-family: 'Playfair Display', serif; }
+    .font-body { font-family: 'Source Sans 3', sans-serif; }
+    
+    /* Layout */
+    .h-full { height: 100%; }
+    .w-full { width: 100%; }
+    .overflow-auto { overflow: auto; }
+    .max-w-4xl { max-width: 56rem; margin-left: auto; margin-right: auto; }
+    .max-w-6xl { max-width: 72rem; margin-left: auto; margin-right: auto; }
+    .max-w-2xl { max-width: 42rem; }
+    .max-w-md { max-width: 28rem; }
+    
+    /* Flexbox */
+    .flex { display: flex; }
+    .inline-flex { display: inline-flex; }
+    .flex-wrap { flex-wrap: wrap; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .items-start { align-items: flex-start; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .flex-1 { flex: 1 1 0%; }
+    
+    /* Grid */
+    .grid { display: grid; }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (min-width: 768px) {
+      .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .md\\:inset-auto { inset: auto; }
+      .md\\:top-1\\/2 { top: 50%; }
+      .md\\:left-1\\/2 { left: 50%; }
+      .md\\:-translate-x-1\\/2 { transform: translateX(-50%) translateY(var(--tw-translate-y, 0)); }
+      .md\\:-translate-y-1\\/2 { --tw-translate-y: -50%; transform: translateX(var(--tw-translate-x, 0)) translateY(-50%); }
+      .md\\:w-full { width: 100%; }
+      .md\\:max-w-2xl { max-width: 42rem; }
+      .md\\:max-w-md { max-width: 28rem; }
+      .md\\:max-h-\\[90\\%\\] { max-height: 90%; }
+      .md\\:max-h-\\[80\\%\\] { max-height: 80%; }
+    }
+    @media (min-width: 1024px) {
+      .lg\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     
+    /* Spacing */
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+    .gap-6 { gap: 1.5rem; }
+    .space-y-1\\.5 > * + * { margin-top: 0.375rem; }
+    .space-y-2 > * + * { margin-top: 0.5rem; }
+    .space-y-5 > * + * { margin-top: 1.25rem; }
+    
+    .p-2 { padding: 0.5rem; }
+    .p-4 { padding: 1rem; }
+    .p-5 { padding: 1.25rem; }
+    .p-6 { padding: 1.5rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-1\\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .py-2\\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+    .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+    .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+    .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+    .pb-8 { padding-bottom: 2rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    
+    /* Typography */
+    .text-xs { font-size: 0.75rem; line-height: 1rem; }
+    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+    .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+    .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+    .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+    .text-5xl { font-size: 3rem; line-height: 1; }
+    .text-6xl { font-size: 3.75rem; line-height: 1; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .text-center { text-align: center; }
+    .whitespace-pre-line { white-space: pre-line; }
+    .leading-relaxed { line-height: 1.625; }
+    .italic { font-style: italic; }
+    
+    /* Colors */
+    .text-red-600 { color: rgb(220, 38, 38); }
+    .text-yellow-800 { color: rgb(133, 77, 14); }
+    .bg-yellow-50 { background-color: rgb(254, 252, 232); }
+    .bg-gray-50 { background-color: rgb(249, 250, 251); }
+    .border-red-200 { border-color: rgb(254, 202, 202); }
+    .border-yellow-400 { border-color: rgb(250, 204, 21); }
+    .opacity-60 { opacity: 0.6; }
+    .opacity-70 { opacity: 0.7; }
+    .opacity-80 { opacity: 0.8; }
+    
+    /* Borders */
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-2xl { border-radius: 1rem; }
+    .rounded-full { border-radius: 9999px; }
+    .rounded { border-radius: 0.25rem; }
+    .border { border-width: 1px; }
+    .border-2 { border-width: 2px; }
+    .border-b { border-bottom-width: 1px; }
+    .border-t { border-top-width: 1px; }
+    
+    /* Sizing */
+    .w-5 { width: 1.25rem; }
+    .w-6 { width: 1.5rem; }
+    .w-8 { width: 2rem; }
+    .w-10 { width: 2.5rem; }
+    .h-5 { height: 1.25rem; }
+    .h-6 { height: 1.5rem; }
+    .h-8 { height: 2rem; }
+    .h-10 { height: 2.5rem; }
+    .h-32 { height: 8rem; }
+    .h-64 { height: 16rem; }
+    .min-w-\\[3rem\\] { min-width: 3rem; }
+    
+    /* Effects */
+    .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+    .shadow-2xl { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+    .overflow-hidden { overflow: hidden; }
+    .cursor-pointer { cursor: pointer; }
+    .resize-none { resize: none; }
+    
+    /* Position */
+    .fixed { position: fixed; }
+    .absolute { position: absolute; }
+    .relative { position: relative; }
+    .inset-0 { inset: 0px; }
+    .inset-4 { inset: 1rem; }
+    .bottom-4 { bottom: 1rem; }
+    .left-1\\/2 { left: 50%; }
+    .-translate-x-1\\/2 { transform: translateX(-50%); }
+    .translate-y-20 { transform: translateY(5rem); }
+    .z-50 { z-index: 50; }
+    
+    /* Display */
+    .hidden { display: none; }
+    .object-cover { object-fit: cover; }
+    
+    /* Transitions */
+    .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .transition-colors { transition-property: color, background-color, border-color; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .duration-300 { transition-duration: 300ms; }
+    
+    /* Custom classes */
     .recipe-card {
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
     .recipe-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
     }
-    
-    .delete-btn {
-      opacity: 0;
-      transition: opacity 0.2s;
+    .category-badge {
+      transition: all 0.2s ease;
     }
-    
-    .recipe-card:hover .delete-btn {
-      opacity: 1;
+    .btn-primary {
+      transition: all 0.2s ease;
     }
-    
-    .fade-in {
-      animation: fadeIn 0.3s ease-in;
+    .btn-primary:hover {
+      filter: brightness(1.1);
     }
+    .hover\\:bg-gray-50:hover { background-color: rgb(249, 250, 251); }
+    .hover\\:bg-red-50:hover { background-color: rgb(254, 242, 242); }
+    .hover\\:bg-gray-100:hover { background-color: rgb(243, 244, 246); }
     
+    .modal-overlay {
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-content {
+      animation: slideUp 0.3s ease;
+    }
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin { animation: spin 1s linear infinite; }
+    
+    .tab-active {
+      position: relative;
+    }
+    .tab-active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: 2px;
     }
     
-    .modal-backdrop {
-      background-color: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
+    /* Form focus */
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      ring: 2px;
+      ring-offset: 1px;
     }
     
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 16px 24px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 1000;
-      animation: slideIn 0.3s ease-out;
-    }
-    
-    @keyframes slideIn {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    
-    .timer-pulse {
-      animation: pulse 1s ease-in-out infinite;
-    }
+    /* Black overlay */
+    .bg-black\\/50 { background-color: rgb(0 0 0 / 0.5); }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
- <body class="h-full">
-  <div id="app" class="h-full w-full overflow-auto" style="background-color: #fef3e2; font-family: 'Georgia', serif;">
-   <div class="max-w-6xl mx-auto px-6 py-8"><!-- Header -->
-    <header class="text-center mb-12">
-     <h1 id="app-title" class="text-5xl font-bold mb-3" style="color: #8b4513;">Le Mie Ricette</h1>
-     <p class="text-lg" style="color: #a0522d;">La tua collezione personale di delizie culinarie</p>
-    </header><!-- Add Recipe Button -->
-    <div class="text-center mb-8"><button id="add-recipe-btn" class="px-8 py-4 text-lg font-semibold rounded-full shadow-lg transition-all duration-200 hover:shadow-xl" style="background-color: #d2691e; color: #ffffff;"> ✨ <span id="add-button-text">Aggiungi Nuova Ricetta</span> </button>
-    </div><!-- Recipes Grid -->
-    <div id="recipes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- Recipe cards will be inserted here -->
+ <body class="h-full font-body">
+  <div id="app" class="h-full w-full overflow-auto"><!-- Header -->
+   <header class="px-6 py-8 text-center">
+    <div class="max-w-4xl mx-auto">
+     <div class="inline-flex items-center gap-3 mb-4">
+      <svg class="w-10 h-10" viewbox="0 0 40 40" fill="none"><path d="M20 4C12 4 6 10 6 18c0 6 4 11 10 13v3c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2v-3c6-2 10-7 10-13 0-8-6-14-14-14z" fill="currentColor" class="text-primary-action" /> <path d="M14 18c0-3.3 2.7-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-secondary-surface" /> <circle cx="20" cy="18" r="3" fill="currentColor" class="text-secondary-action" />
+      </svg>
+      <h1 id="app-title" class="font-display text-4xl font-bold">Ricettario Digitale</h1>
+     </div>
+     <p id="app-subtitle" class="text-lg opacity-80">La tua collezione personale di ricette sempre a portata di mano</p>
+    </div>
+   </header><!-- Main Content -->
+   <main class="max-w-6xl mx-auto px-4 pb-8"><!-- Category Tabs & Add Button -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+     <div id="category-tabs" class="flex flex-wrap gap-2"><!-- Categories will be populated dynamically -->
+     </div><button id="add-recipe-btn" class="btn-primary px-5 py-2.5 rounded-full font-medium flex items-center gap-2 shadow-lg">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg> Nuova Ricetta </button>
+    </div><!-- Recipe Count -->
+    <p id="recipe-count" class="text-sm opacity-70 mb-4"></p><!-- Recipes Grid -->
+    <div id="recipes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- Recipe cards will be populated here -->
     </div><!-- Empty State -->
-    <div id="empty-state" class="text-center py-16 hidden">
+    <div id="empty-state" class="hidden text-center py-16">
      <div class="text-6xl mb-4">
       🍳
      </div>
-     <p id="empty-state-text" class="text-xl" style="color: #a0522d;">Nessuna ricetta ancora. Inizia ad aggiungerne una!</p>
+     <h3 class="font-display text-2xl font-semibold mb-2">Nessuna ricetta ancora</h3>
+     <p class="opacity-70 mb-6">Inizia ad aggiungere le tue ricette preferite!</p><button id="add-first-recipe-btn" class="btn-primary px-6 py-3 rounded-full font-medium inline-flex items-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg> Aggiungi la prima ricetta </button>
+    </div><!-- Limit Warning -->
+    <div id="limit-warning" class="hidden mt-4 p-4 rounded-lg border-2 border-yellow-400 bg-yellow-50 text-yellow-800">
+     ⚠️ Hai raggiunto il limite massimo di 999 ricette. Elimina alcune ricette per aggiungerne di nuove.
     </div>
-   </div><!-- Add/Edit Recipe Modal -->
-   <div id="recipe-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90%] overflow-y-auto">
-     <div class="p-8">
-      <div class="flex justify-between items-center mb-6">
-       <h2 id="modal-title" class="text-3xl font-bold" style="color: #8b4513;">Nuova Ricetta</h2><button id="close-modal" class="text-3xl hover:opacity-70 transition-opacity" style="color: #a0522d;">×</button>
+   </main><!-- Add/Edit Recipe Modal -->
+   <div id="recipe-modal" class="hidden fixed inset-0 z-50">
+    <div class="modal-overlay absolute inset-0 bg-black/50" onclick="closeModal()"></div>
+    <div class="modal-content absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-2xl md:max-h-[90%] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+     <div class="p-6 border-b flex items-center justify-between">
+      <h2 id="modal-title" class="font-display text-2xl font-semibold">Nuova Ricetta</h2><button onclick="closeModal()" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+       </svg></button>
+     </div>
+     <form id="recipe-form" class="flex-1 overflow-auto p-6 space-y-5"><input type="hidden" id="recipe-id">
+      <div><label for="recipe-title" class="block text-sm font-medium mb-1.5">Nome della ricetta *</label> <input type="text" id="recipe-title" required class="w-full px-4 py-2.5 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all" placeholder="es. Pasta alla Carbonara">
       </div>
-      <form id="recipe-form">
-       <div class="space-y-6">
-        <div><label for="recipe-name" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Nome della Ricetta</label> <input type="text" id="recipe-name" required class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;">
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-         <div><label for="recipe-category" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Categoria</label> <select id="recipe-category" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;"> <option value="Antipasti">Antipasti</option> <option value="Primi">Primi</option> <option value="Secondi">Secondi</option> <option value="Contorni">Contorni</option> <option value="Dolci">Dolci</option> <option value="Altro">Altro</option> </select>
-         </div>
-         <div><label for="recipe-difficulty" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Difficoltà</label> <select id="recipe-difficulty" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;"> <option value="Facile">😊 Facile</option> <option value="Media">😐 Media</option> <option value="Difficile">😰 Difficile</option> </select>
-         </div>
-        </div>
-        <div class="grid grid-cols-3 gap-4">
-         <div><label for="recipe-time" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Preparazione (min)</label> <input type="number" id="recipe-time" required min="1" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;">
-         </div>
-         <div><label for="recipe-cooking-time" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Cottura (min)</label> <input type="number" id="recipe-cooking-time" min="0" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;">
-         </div>
-         <div><label for="recipe-servings" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Porzioni</label> <input type="number" id="recipe-servings" required min="1" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;">
-         </div>
-        </div>
-        <div><label for="recipe-ingredients" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Ingredienti</label>
-         <p class="text-xs mb-2" style="color: #a0522d;">Usa numeri per quantità scalabili (es: "200g farina", "3 uova"). Uno per riga.</p><textarea id="recipe-ingredients" required rows="6" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;" placeholder="200g farina
-3 uova
-100ml latte
-1 pizzico di sale"></textarea>
-        </div>
-        <div><label for="recipe-instructions" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Istruzioni</label> <textarea id="recipe-instructions" required rows="8" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;" placeholder="Descrivi i passaggi della preparazione..."></textarea>
-        </div>
-        <div><label for="recipe-notes" class="block text-sm font-semibold mb-2" style="color: #8b4513;">Note e Consigli (opzionale)</label> <textarea id="recipe-notes" rows="3" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2" style="border-color: #d2691e; background-color: #fff8f0;" placeholder="Consigli di presentazione, varianti, abbinamenti..."></textarea>
-        </div>
+      <div><label for="recipe-photo" class="block text-sm font-medium mb-1.5">📸 URL Foto (opzionale)</label> <input type="url" id="recipe-photo" class="w-full px-4 py-2.5 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all" placeholder="https://esempio.com/foto.jpg">
+       <p class="text-xs opacity-60 mt-1">Inserisci l'URL di un'immagine online della ricetta</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+       <div><label for="recipe-category" class="block text-sm font-medium mb-1.5">Categoria *</label> <select id="recipe-category" required class="w-full px-4 py-2.5 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all"> <option value="">Seleziona...</option> <option value="Antipasti">🥗 Antipasti</option> <option value="Primi">🍝 Primi</option> <option value="Secondi">🥩 Secondi</option> <option value="Contorni">🥬 Contorni</option> <option value="Dolci">🍰 Dolci</option> <option value="Bevande">🥤 Bevande</option> </select>
        </div>
-       <div class="flex gap-4 mt-8"><button type="submit" id="save-recipe-btn" class="flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg" style="background-color: #d2691e; color: #ffffff;"> Salva Ricetta </button> <button type="button" id="cancel-btn" class="flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200" style="background-color: #f5deb3; color: #8b4513;"> Annulla </button>
+       <div><label for="recipe-servings" class="block text-sm font-medium mb-1.5">Porzioni</label> <input type="number" id="recipe-servings" min="1" max="100" class="w-full px-4 py-2.5 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all" placeholder="4">
        </div>
-      </form>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+       <div><label for="recipe-prep-time" class="block text-sm font-medium mb-1.5">Tempo preparazione</label> <input type="text" id="recipe-prep-time" class="w-full px-4 py-2.5 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all" placeholder="es. 15 min">
+       </div>
+       <div><label for="recipe-cook-time" class="block text-sm font-medium mb-1.5">Tempo cottura</label> <input type="text" id="recipe-cook-time" class="w-full px-4 py-2.5 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all" placeholder="es. 20 min">
+       </div>
+      </div>
+      <div><label for="recipe-ingredients" class="block text-sm font-medium mb-1.5">Ingredienti *</label> <textarea id="recipe-ingredients" required rows="4" class="w-full px-4 py-2.5 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all resize-none" placeholder="Un ingrediente per riga
+es. 400g spaghetti
+150g guanciale
+4 tuorli d'uovo"></textarea>
+      </div>
+      <div><label for="recipe-instructions" class="block text-sm font-medium mb-1.5">Procedimento *</label> <textarea id="recipe-instructions" required rows="5" class="w-full px-4 py-2.5 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all resize-none" placeholder="Descrivi i passaggi della preparazione..."></textarea>
+      </div>
+      <div><label for="recipe-notes" class="block text-sm font-medium mb-1.5">Note personali</label> <textarea id="recipe-notes" rows="2" class="w-full px-4 py-2.5 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all resize-none" placeholder="Suggerimenti, varianti, trucchi..."></textarea>
+      </div>
+     </form>
+     <div class="p-6 border-t flex gap-3 justify-end"><button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-full font-medium border-2 hover:bg-gray-50 transition-colors"> Annulla </button> <button type="submit" form="recipe-form" id="save-btn" class="btn-primary px-6 py-2.5 rounded-full font-medium flex items-center gap-2"> <span id="save-btn-text">Salva Ricetta</span>
+       <svg id="save-spinner" class="hidden w-5 h-5 animate-spin" fill="none" viewbox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" /> <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+       </svg></button>
      </div>
     </div>
    </div><!-- View Recipe Modal -->
-   <div id="view-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90%] overflow-y-auto">
-     <div class="p-8">
-      <div class="flex justify-between items-start mb-6">
-       <div class="flex-1">
-        <h2 id="view-name" class="text-4xl font-bold mb-2" style="color: #8b4513;"></h2>
-        <div class="flex flex-wrap gap-3 text-sm mb-3" style="color: #a0522d;"><span id="view-category" class="px-3 py-1 rounded-full" style="background-color: #f5deb3;"></span> <span id="view-difficulty" class="px-3 py-1 rounded"></span> <span>⏱️ Prep: <span id="view-time"></span> min</span> <span id="view-cooking-time-container" class="hidden">🔥 Cottura: <span id="view-cooking-time"></span> min</span>
-        </div>
-       </div><button id="close-view-modal" class="text-3xl hover:opacity-70 transition-opacity ml-4" style="color: #a0522d;">×</button>
+   <div id="view-modal" class="hidden fixed inset-0 z-50">
+    <div class="modal-overlay absolute inset-0 bg-black/50" onclick="closeViewModal()"></div>
+    <div class="modal-content absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-2xl md:max-h-[90%] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+     <div class="p-6 border-b flex items-center justify-between">
+      <div><span id="view-category" class="category-badge text-xs font-semibold px-3 py-1 rounded-full"></span>
+       <h2 id="view-title" class="font-display text-2xl font-semibold mt-2"></h2>
+      </div><button onclick="closeViewModal()" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+       </svg></button>
+     </div>
+     <div class="flex-1 overflow-auto p-6"><!-- Photo -->
+      <div id="view-photo-container" class="hidden mb-6"><img id="view-photo" class="w-full h-64 object-cover rounded-xl" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.background='#e5e7eb'; this.alt='Immagine non disponibile';">
       </div>
-      <div class="space-y-6"><!-- Portion Scaler -->
-       <div class="p-4 rounded-lg" style="background-color: #fff8f0; border: 2px solid #f5deb3;">
-        <div class="flex items-center justify-between mb-3"><span class="font-semibold" style="color: #8b4513;">👥 Adatta porzioni:</span>
-         <div class="flex items-center gap-3"><button id="decrease-portions" class="w-10 h-10 rounded-full font-bold text-xl hover:opacity-80 transition-opacity" style="background-color: #d2691e; color: #ffffff;">−</button> <span id="current-portions" class="text-2xl font-bold min-w-[3rem] text-center" style="color: #8b4513;">4</span> <button id="increase-portions" class="w-10 h-10 rounded-full font-bold text-xl hover:opacity-80 transition-opacity" style="background-color: #d2691e; color: #ffffff;">+</button>
-         </div>
+      <div id="view-meta" class="flex flex-wrap gap-4 mb-6 text-sm opacity-80"></div><!-- Servings adjuster -->
+      <div id="servings-adjuster" class="hidden mb-6 p-4 rounded-xl border-2">
+       <div class="flex items-center justify-between"><span class="font-medium">👥 Porzioni:</span>
+        <div class="flex items-center gap-3"><button id="decrease-servings" class="w-8 h-8 rounded-full flex items-center justify-center font-bold transition-colors">−</button> <span id="current-servings" class="font-bold text-xl min-w-[3rem] text-center"></span> <button id="increase-servings" class="w-8 h-8 rounded-full flex items-center justify-center font-bold transition-colors">+</button>
         </div>
-        <div class="text-sm text-center" style="color: #a0522d;">
-         Ricetta originale per: <span id="original-portions" class="font-semibold">4</span> porzioni
-        </div>
-       </div><!-- Timer -->
-       <div id="timer-section" class="p-4 rounded-lg" style="background-color: #fff8f0; border: 2px solid #f5deb3;">
-        <div class="flex items-center justify-between mb-3"><span class="font-semibold" style="color: #8b4513;">⏱️ Timer Cottura</span>
-         <div class="flex items-center gap-3"><select id="timer-minutes" class="px-3 py-2 rounded border-2" style="border-color: #d2691e; background-color: #ffffff;"> </select> <button id="start-timer" class="px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity" style="background-color: #d2691e; color: #ffffff;"> Avvia </button>
-         </div>
-        </div>
-        <div id="timer-display" class="hidden">
-         <div class="text-center mb-3">
-          <div id="timer-countdown" class="text-5xl font-bold" style="color: #d2691e;">
-           00:00
-          </div>
-          <div id="timer-status" class="text-sm mt-2" style="color: #a0522d;">
-           Timer attivo
-          </div>
-         </div>
-         <div class="flex gap-3"><button id="pause-timer" class="flex-1 py-2 rounded-lg font-semibold" style="background-color: #FFD700; color: #333333;"> ⏸️ Pausa </button> <button id="stop-timer" class="flex-1 py-2 rounded-lg font-semibold" style="background-color: #cd5c5c; color: #ffffff;"> ⏹️ Stop </button>
-         </div>
-        </div>
-       </div>
-       <div>
-        <h3 class="text-xl font-bold mb-3" style="color: #8b4513;">🥘 Ingredienti</h3>
-        <ul id="view-ingredients" class="space-y-2 pl-5" style="color: #6b4423;"></ul>
-       </div>
-       <div>
-        <h3 class="text-xl font-bold mb-3" style="color: #8b4513;">📝 Istruzioni</h3>
-        <div id="view-instructions" class="whitespace-pre-wrap leading-relaxed" style="color: #6b4423;"></div>
-       </div>
-       <div id="view-notes-section" class="hidden">
-        <h3 class="text-xl font-bold mb-3" style="color: #8b4513;">💡 Note e Consigli</h3>
-        <div id="view-notes" class="whitespace-pre-wrap leading-relaxed p-4 rounded-lg" style="color: #6b4423; background-color: #fff8f0;"></div>
        </div>
       </div>
-      <div class="flex gap-4 mt-8"><button id="edit-from-view-btn" class="flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg" style="background-color: #d2691e; color: #ffffff;"> ✏️ Modifica </button> <button id="delete-from-view-btn" class="flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200" style="background-color: #cd5c5c; color: #ffffff;"> 🗑️ Elimina </button>
+      <div class="mb-6">
+       <div class="flex items-center justify-between mb-3">
+        <h3 class="font-display text-lg font-semibold flex items-center gap-2"><span>🥘</span> Ingredienti</h3><button id="add-to-shopping-list" class="text-sm px-3 py-1.5 rounded-full border-2 flex items-center gap-1 transition-colors hover:bg-gray-50"> 🛒 Lista spesa </button>
+       </div>
+       <ul id="view-ingredients" class="space-y-1.5"></ul>
+      </div>
+      <div class="mb-6">
+       <div class="flex items-center justify-between mb-3">
+        <h3 class="font-display text-lg font-semibold flex items-center gap-2"><span>👨‍🍳</span> Procedimento</h3><button id="start-timer-btn" class="hidden text-sm px-3 py-1.5 rounded-full border-2 flex items-center gap-1 transition-colors hover:bg-gray-50"> ⏱️ Avvia timer </button>
+       </div>
+       <div id="view-instructions" class="whitespace-pre-line leading-relaxed"></div><!-- Timer Display -->
+       <div id="timer-display" class="hidden mt-4 p-4 rounded-xl border-2 text-center">
+        <div class="text-3xl font-bold mb-2" id="timer-countdown">
+         00:00
+        </div>
+        <div class="flex gap-2 justify-center"><button id="pause-timer" class="px-4 py-2 rounded-full text-sm font-medium transition-colors">⏸️ Pausa</button> <button id="reset-timer" class="px-4 py-2 rounded-full text-sm font-medium transition-colors">🔄 Reset</button>
+        </div>
+       </div>
+      </div>
+      <div id="view-notes-section" class="hidden">
+       <h3 class="font-display text-lg font-semibold mb-3 flex items-center gap-2"><span>📝</span> Note</h3>
+       <div id="view-notes" class="italic opacity-80"></div>
       </div>
      </div>
+     <div class="p-6 border-t flex gap-3 justify-between"><button id="delete-recipe-btn" class="px-5 py-2.5 rounded-full font-medium text-red-600 border-2 border-red-200 hover:bg-red-50 transition-colors flex items-center gap-2">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+       </svg><span id="delete-btn-text">Elimina</span> </button> <button id="edit-recipe-btn" class="btn-primary px-5 py-2.5 rounded-full font-medium flex items-center gap-2">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+       </svg> Modifica </button>
+     </div>
     </div>
+   </div><!-- Shopping List Modal -->
+   <div id="shopping-modal" class="hidden fixed inset-0 z-50">
+    <div class="modal-overlay absolute inset-0 bg-black/50" onclick="closeShoppingModal()"></div>
+    <div class="modal-content absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md md:max-h-[80%] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+     <div class="p-6 border-b flex items-center justify-between">
+      <h2 class="font-display text-2xl font-semibold flex items-center gap-2">🛒 Lista della Spesa</h2><button onclick="closeShoppingModal()" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+       </svg></button>
+     </div>
+     <div class="flex-1 overflow-auto p-6">
+      <ul id="shopping-list-items" class="space-y-2"></ul>
+     </div>
+     <div class="p-6 border-t"><button onclick="copyShoppingList()" class="w-full btn-primary px-5 py-3 rounded-full font-medium flex items-center justify-center gap-2"> 📋 Copia lista </button>
+     </div>
+    </div>
+   </div><!-- Toast Notification -->
+   <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50"><span id="toast-message"></span>
    </div>
   </div>
   <script>
     const defaultConfig = {
-      app_title: "Le Mie Ricette",
-      add_button_text: "Aggiungi Nuova Ricetta",
-      empty_state_text: "Nessuna ricetta ancora. Inizia ad aggiungerne una!",
-      background_color: "#fef3e2",
-      card_color: "#ffffff",
-      text_color: "#8b4513",
-      primary_button_color: "#d2691e",
-      secondary_color: "#f5deb3",
-      font_family: "Georgia",
+      app_title: 'Ricettario Digitale',
+      app_subtitle: 'La tua collezione personale di ricette sempre a portata di mano',
+      background_color: '#FFF8F0',
+      surface_color: '#FFFFFF',
+      text_color: '#3D2314',
+      primary_action_color: '#C45C26',
+      secondary_action_color: '#7B8B6F',
+      font_family: 'Source Sans 3',
       font_size: 16
     };
 
     let recipes = [];
-    let editingRecipeId = null;
     let currentRecipe = null;
-    let currentPortions = 1;
-    let originalPortions = 1;
-    
-    // Timer state
+    let activeCategory = 'Tutte';
+    let deleteConfirmMode = false;
+    let currentServings = 0;
     let timerInterval = null;
     let timerSeconds = 0;
     let timerPaused = false;
 
+    const categories = ['Tutte', 'Antipasti', 'Primi', 'Secondi', 'Contorni', 'Dolci', 'Bevande'];
+    const categoryEmojis = {
+      'Tutte': '📚',
+      'Antipasti': '🥗',
+      'Primi': '🍝',
+      'Secondi': '🥩',
+      'Contorni': '🥬',
+      'Dolci': '🍰',
+      'Bevande': '🥤'
+    };
+
+    // Load recipes from localStorage
     function loadRecipes() {
       const stored = localStorage.getItem('recipes');
-      if (stored) {
-        recipes = JSON.parse(stored);
-      }
+      recipes = stored ? JSON.parse(stored) : [];
+      renderRecipes();
+      updateCategoryTabs();
     }
 
-    function saveRecipes() {
+    // Save recipes to localStorage
+    function saveRecipesToStorage() {
       localStorage.setItem('recipes', JSON.stringify(recipes));
     }
 
-    function showToast(message, isError = false) {
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.textContent = message;
-      toast.style.backgroundColor = isError ? '#cd5c5c' : '#90EE90';
-      toast.style.color = isError ? '#ffffff' : '#2d5016';
-      document.body.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.style.animation = 'slideIn 0.3s ease-out reverse';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
+    // Apply default styles on load
+    function applyDefaultStyles() {
+      const bg = defaultConfig.background_color;
+      const surface = defaultConfig.surface_color;
+      const text = defaultConfig.text_color;
+      const primary = defaultConfig.primary_action_color;
+      const secondary = defaultConfig.secondary_action_color;
+
+      // Apply colors
+      document.body.style.backgroundColor = bg;
+      document.body.style.color = text;
+
+      // App title and subtitle
+      const titleEl = document.getElementById('app-title');
+      const subtitleEl = document.getElementById('app-subtitle');
+      if (titleEl) {
+        titleEl.style.color = text;
+      }
+
+      // Primary action buttons
+      document.querySelectorAll('.btn-primary').forEach(btn => {
+        btn.style.backgroundColor = primary;
+        btn.style.color = surface;
+      });
+
+      // Modal backgrounds
+      document.querySelectorAll('.modal-content').forEach(modal => {
+        modal.style.backgroundColor = surface;
+      });
+
+      // Inputs
+      document.querySelectorAll('input, select, textarea').forEach(input => {
+        input.style.borderColor = bg;
+        input.style.backgroundColor = surface;
+      });
+
+      // Toast
+      const toast = document.getElementById('toast');
+      if (toast) {
+        toast.style.backgroundColor = text;
+        toast.style.color = surface;
+      }
     }
 
+    // Render Functions
     function renderRecipes() {
-      const container = document.getElementById('recipes-container');
+      const grid = document.getElementById('recipes-grid');
       const emptyState = document.getElementById('empty-state');
-      
-      if (recipes.length === 0) {
-        container.innerHTML = '';
+      const countEl = document.getElementById('recipe-count');
+      const limitWarning = document.getElementById('limit-warning');
+
+      const surface = defaultConfig.surface_color;
+      const text = defaultConfig.text_color;
+      const secondary = defaultConfig.secondary_action_color;
+
+      const filtered = activeCategory === 'Tutte' 
+        ? recipes 
+        : recipes.filter(r => r.category === activeCategory);
+
+      // Show/hide limit warning
+      if (recipes.length >= 999) {
+        limitWarning.classList.remove('hidden');
+      } else {
+        limitWarning.classList.add('hidden');
+      }
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
         emptyState.classList.remove('hidden');
+        countEl.textContent = '';
+        
+        // Style empty state button
+        const emptyBtn = document.getElementById('add-first-recipe-btn');
+        if (emptyBtn) {
+          const primary = defaultConfig.primary_action_color;
+          emptyBtn.style.backgroundColor = primary;
+          emptyBtn.style.color = surface;
+        }
         return;
       }
-      
+
       emptyState.classList.add('hidden');
-      
-      container.innerHTML = recipes.map(recipe => {
-        const difficultyColors = {
-          'Facile': '#90EE90',
-          'Media': '#FFD700',
-          'Difficile': '#FF6347'
-        };
-        
-        return `
-        <div class="recipe-card fade-in bg-white rounded-xl shadow-md p-6 relative cursor-pointer" data-id="${recipe.id}" style="background-color: ${window.elementSdk?.config?.card_color || defaultConfig.card_color};">
-          <button class="delete-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity" style="background-color: #cd5c5c; color: #ffffff;" onclick="confirmDelete('${recipe.id}', event)">
-            ×
-          </button>
-          
-          <h3 class="text-2xl font-bold mb-2 pr-8" style="color: ${window.elementSdk?.config?.text_color || defaultConfig.text_color};">${recipe.name}</h3>
-          
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-sm px-3 py-1 rounded-full" style="background-color: ${window.elementSdk?.config?.secondary_color || defaultConfig.secondary_color}; color: ${window.elementSdk?.config?.text_color || defaultConfig.text_color};">${recipe.category}</span>
-            <span class="text-xs px-2 py-1 rounded" style="background-color: ${difficultyColors[recipe.difficulty]}; color: ${recipe.difficulty === 'Difficile' ? '#ffffff' : '#333333'};">
-              ${recipe.difficulty}
-            </span>
-          </div>
-          
-          <div class="flex flex-wrap gap-3 text-sm mb-4" style="color: #a0522d;">
-            <span>⏱️ ${recipe.time}min</span>
-            ${recipe.cookingTime ? `<span>🔥 ${recipe.cookingTime}min</span>` : ''}
-            <span>👥 ${recipe.servings}</span>
-          </div>
-          
-          <div class="text-sm" style="color: #6b4423;">
-            <strong>Ingredienti:</strong> ${recipe.ingredients.split('\n').filter(i => i.trim()).length}
-          </div>
-        </div>
-      `}).join('');
-      
-      document.querySelectorAll('.recipe-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-          if (!e.target.closest('button')) {
-            viewRecipe(card.dataset.id);
-          }
-        });
+      countEl.textContent = `${filtered.length} ricett${filtered.length === 1 ? 'a' : 'e'}${activeCategory !== 'Tutte' ? ` in ${activeCategory}` : ''}`;
+
+      // Update existing cards or create new ones
+      const existingCards = new Map();
+      grid.querySelectorAll('.recipe-card').forEach(card => {
+        existingCards.set(card.dataset.id, card);
       });
+
+      const fragment = document.createDocumentFragment();
+      const processedIds = new Set();
+
+      filtered.forEach(recipe => {
+        processedIds.add(recipe.id);
+        let card = existingCards.get(recipe.id);
+
+        if (card) {
+          // Update existing card
+          updateRecipeCard(card, recipe, surface, text, secondary);
+        } else {
+          // Create new card
+          card = createRecipeCard(recipe, surface, text, secondary);
+          fragment.appendChild(card);
+        }
+      });
+
+      // Remove cards that are no longer in the filtered list
+      existingCards.forEach((card, id) => {
+        if (!processedIds.has(id)) {
+          card.remove();
+        }
+      });
+
+      grid.appendChild(fragment);
     }
 
-    function openModal(recipeId = null) {
+    function createRecipeCard(recipe, surface, text, secondary) {
+      const card = document.createElement('div');
+      card.className = 'recipe-card rounded-2xl shadow-lg overflow-hidden cursor-pointer';
+      card.dataset.id = recipe.id;
+      card.onclick = () => viewRecipe(recipe);
+      updateRecipeCard(card, recipe, surface, text, secondary);
+      return card;
+    }
+
+    function updateRecipeCard(card, recipe, surface, text, secondary) {
+      card.style.backgroundColor = surface;
+      
+      const hasPhoto = recipe.photoUrl && recipe.photoUrl.trim();
+      const photoHtml = hasPhoto 
+        ? `<img src="${escapeHtml(recipe.photoUrl)}" class="w-full h-32 object-cover" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" alt="${escapeHtml(recipe.title)}">
+           <div class="h-32 hidden items-center justify-center text-5xl" style="background: linear-gradient(135deg, ${secondary}30, ${secondary}10);">
+             ${categoryEmojis[recipe.category] || '🍽️'}
+           </div>`
+        : `<div class="h-32 flex items-center justify-center text-5xl" style="background: linear-gradient(135deg, ${secondary}30, ${secondary}10);">
+             ${categoryEmojis[recipe.category] || '🍽️'}
+           </div>`;
+      
+      card.innerHTML = `
+        ${photoHtml}
+        <div class="p-5">
+          <span class="category-badge text-xs font-semibold px-3 py-1 rounded-full" style="background-color: ${secondary}20; color: ${secondary};">
+            ${recipe.category}
+          </span>
+          <h3 class="font-display text-xl font-semibold mt-3 mb-2" style="color: ${text};">${escapeHtml(recipe.title)}</h3>
+          <div class="flex flex-wrap gap-3 text-sm opacity-70">
+            ${recipe.servings ? `<span>👥 ${recipe.servings} porzioni</span>` : ''}
+            ${recipe.prepTime ? `<span>⏱️ ${escapeHtml(recipe.prepTime)}</span>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function updateCategoryTabs() {
+      const container = document.getElementById('category-tabs');
+      const text = defaultConfig.text_color;
+      const primary = defaultConfig.primary_action_color;
+      const bg = defaultConfig.background_color;
+
+      container.innerHTML = categories.map(cat => {
+        const count = cat === 'Tutte' ? recipes.length : recipes.filter(r => r.category === cat).length;
+        const isActive = activeCategory === cat;
+        return `
+          <button 
+            onclick="setCategory('${cat}')" 
+            class="tab-btn px-4 py-2 rounded-full text-sm font-medium transition-all ${isActive ? 'tab-active' : ''}"
+            style="background-color: ${isActive ? primary : bg}; color: ${isActive ? '#fff' : text};"
+          >
+            ${categoryEmojis[cat]} ${cat} ${count > 0 ? `(${count})` : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function setCategory(cat) {
+      activeCategory = cat;
+      renderRecipes();
+      updateCategoryTabs();
+    }
+
+    // Modal Functions
+    function openModal(recipe = null) {
       const modal = document.getElementById('recipe-modal');
-      const modalTitle = document.getElementById('modal-title');
+      const title = document.getElementById('modal-title');
       const form = document.getElementById('recipe-form');
-      
-      editingRecipeId = recipeId;
-      
-      if (recipeId) {
-        const recipe = recipes.find(r => r.id === recipeId);
-        modalTitle.textContent = 'Modifica Ricetta';
-        document.getElementById('recipe-name').value = recipe.name;
+
+      if (recipe) {
+        title.textContent = 'Modifica Ricetta';
+        document.getElementById('recipe-id').value = recipe.id;
+        document.getElementById('recipe-title').value = recipe.title;
+        document.getElementById('recipe-photo').value = recipe.photoUrl || '';
         document.getElementById('recipe-category').value = recipe.category;
-        document.getElementById('recipe-time').value = recipe.time;
-        document.getElementById('recipe-cooking-time').value = recipe.cookingTime || '';
-        document.getElementById('recipe-servings').value = recipe.servings;
+        document.getElementById('recipe-servings').value = recipe.servings || '';
+        document.getElementById('recipe-prep-time').value = recipe.prepTime || '';
+        document.getElementById('recipe-cook-time').value = recipe.cookTime || '';
         document.getElementById('recipe-ingredients').value = recipe.ingredients;
         document.getElementById('recipe-instructions').value = recipe.instructions;
-        document.getElementById('recipe-difficulty').value = recipe.difficulty;
         document.getElementById('recipe-notes').value = recipe.notes || '';
       } else {
-        modalTitle.textContent = 'Nuova Ricetta';
+        title.textContent = 'Nuova Ricetta';
         form.reset();
+        document.getElementById('recipe-id').value = '';
       }
-      
+
       modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
     }
 
     function closeModal() {
-      const modal = document.getElementById('recipe-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      editingRecipeId = null;
+      document.getElementById('recipe-modal').classList.add('hidden');
+      document.body.style.overflow = '';
     }
-    
-    // Parse ingredient and scale it
-    function scaleIngredient(ingredient, scale) {
-      // Match patterns like "200g", "3 cucchiai", "1.5 kg", etc.
-      const numberPattern = /(\d+\.?\d*)\s*([a-zA-Z]*)\s+(.*)/;
-      const match = ingredient.match(numberPattern);
+
+    function viewRecipe(recipe) {
+      currentRecipe = recipe;
+      deleteConfirmMode = false;
+      stopTimer();
       
-      if (match) {
-        const amount = parseFloat(match[1]);
-        const unit = match[2];
-        const rest = match[3];
-        const scaledAmount = (amount * scale).toFixed(1).replace(/\.0$/, '');
-        return `${scaledAmount}${unit} ${rest}`;
+      const secondary = defaultConfig.secondary_action_color;
+      const primary = defaultConfig.primary_action_color;
+      const bg = defaultConfig.background_color;
+
+      // Show photo if available
+      const photoContainer = document.getElementById('view-photo-container');
+      const photoImg = document.getElementById('view-photo');
+      if (recipe.photoUrl && recipe.photoUrl.trim()) {
+        photoImg.src = recipe.photoUrl;
+        photoImg.alt = recipe.title;
+        photoContainer.classList.remove('hidden');
+      } else {
+        photoContainer.classList.add('hidden');
       }
-      
-      // If no number found, return as is
-      return ingredient;
+
+      document.getElementById('view-category').textContent = `${categoryEmojis[recipe.category]} ${recipe.category}`;
+      document.getElementById('view-category').style.backgroundColor = secondary + '20';
+      document.getElementById('view-category').style.color = secondary;
+      document.getElementById('view-title').textContent = recipe.title;
+
+      const meta = [];
+      if (recipe.servings) meta.push(`👥 ${recipe.servings} porzioni`);
+      if (recipe.prepTime) meta.push(`⏱️ Prep: ${recipe.prepTime}`);
+      if (recipe.cookTime) meta.push(`🔥 Cottura: ${recipe.cookTime}`);
+      document.getElementById('view-meta').innerHTML = meta.map(m => `<span>${m}</span>`).join('');
+
+      // Setup servings adjuster
+      const servingsAdjuster = document.getElementById('servings-adjuster');
+      if (recipe.servings && recipe.servings > 0) {
+        currentServings = recipe.servings;
+        if (!recipe.baseServings) {
+          recipe.baseServings = recipe.servings;
+        }
+        document.getElementById('current-servings').textContent = currentServings;
+        servingsAdjuster.classList.remove('hidden');
+        servingsAdjuster.style.borderColor = bg;
+        servingsAdjuster.style.backgroundColor = bg + '40';
+        
+        const decreaseBtn = document.getElementById('decrease-servings');
+        const increaseBtn = document.getElementById('increase-servings');
+        decreaseBtn.style.backgroundColor = bg;
+        decreaseBtn.style.color = defaultConfig.text_color;
+        increaseBtn.style.backgroundColor = bg;
+        increaseBtn.style.color = defaultConfig.text_color;
+      } else {
+        servingsAdjuster.classList.add('hidden');
+      }
+
+      updateIngredientsList();
+
+      document.getElementById('view-instructions').textContent = recipe.instructions;
+
+      // Setup timer button
+      const timerBtn = document.getElementById('start-timer-btn');
+      const cookTimeMinutes = extractMinutes(recipe.cookTime);
+      if (cookTimeMinutes > 0) {
+        timerBtn.classList.remove('hidden');
+        timerBtn.style.borderColor = bg;
+        currentRecipe.cookTimeMinutes = cookTimeMinutes;
+      } else {
+        timerBtn.classList.add('hidden');
+      }
+
+      const notesSection = document.getElementById('view-notes-section');
+      if (recipe.notes && recipe.notes.trim()) {
+        notesSection.classList.remove('hidden');
+        document.getElementById('view-notes').textContent = recipe.notes;
+      } else {
+        notesSection.classList.add('hidden');
+      }
+
+      document.getElementById('delete-btn-text').textContent = 'Elimina';
+      document.getElementById('view-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
     }
-    
-    function updateIngredientDisplay() {
-      const ingredientsList = document.getElementById('view-ingredients');
-      const scale = currentPortions / originalPortions;
+
+    function closeViewModal() {
+      document.getElementById('view-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+      stopTimer();
+      currentRecipe = null;
+      deleteConfirmMode = false;
+    }
+
+    // Servings scaling functions
+    function updateIngredientsList() {
+      if (!currentRecipe) return;
       
-      ingredientsList.innerHTML = currentRecipe.ingredients.split('\n')
-        .filter(i => i.trim())
-        .map(i => {
-          const scaled = scaleIngredient(i.trim(), scale);
-          return `<li style="color: #6b4423;">• ${scaled}</li>`;
+      const ingredientsList = currentRecipe.ingredients.split('\n').filter(i => i.trim());
+      const scale = currentRecipe.baseServings ? currentServings / currentRecipe.baseServings : 1;
+      
+      document.getElementById('view-ingredients').innerHTML = ingredientsList
+        .map(ing => {
+          const scaled = scaleIngredient(ing, scale);
+          return `<li class="flex items-start gap-2"><span class="text-green-600">•</span> ${escapeHtml(scaled)}</li>`;
         })
         .join('');
     }
-    
-    function updatePortions(change) {
-      const newPortions = currentPortions + change;
-      if (newPortions >= 1 && newPortions <= 99) {
-        currentPortions = newPortions;
-        document.getElementById('current-portions').textContent = currentPortions;
-        updateIngredientDisplay();
+
+    function scaleIngredient(ingredient, scale) {
+      // Match numbers (including decimals) at the start of the ingredient
+      const match = ingredient.match(/^(\d+(?:[.,]\d+)?)\s*([a-zA-Z]*)\s+(.+)$/);
+      
+      if (match) {
+        const amount = parseFloat(match[1].replace(',', '.'));
+        const unit = match[2];
+        const item = match[3];
+        const scaledAmount = (amount * scale).toFixed(1).replace(/\.0$/, '');
+        return `${scaledAmount}${unit} ${item}`;
       }
+      
+      return ingredient;
     }
-    
+
+    function changeServings(delta) {
+      if (!currentRecipe || !currentRecipe.baseServings) return;
+      
+      currentServings = Math.max(1, currentServings + delta);
+      document.getElementById('current-servings').textContent = currentServings;
+      updateIngredientsList();
+    }
+
+    function extractMinutes(timeString) {
+      if (!timeString) return 0;
+      const match = timeString.match(/(\d+)\s*min/i);
+      return match ? parseInt(match[1]) : 0;
+    }
+
     // Timer functions
-    function setupTimer(cookingTime, prepTime) {
-      const timerSelect = document.getElementById('timer-minutes');
-      timerSelect.innerHTML = '';
-      
-      const times = [];
-      if (cookingTime) times.push({ label: `Cottura (${cookingTime} min)`, value: cookingTime });
-      if (prepTime) times.push({ label: `Preparazione (${prepTime} min)`, value: prepTime });
-      const total = (cookingTime || 0) + (prepTime || 0);
-      if (total > 0) times.push({ label: `Totale (${total} min)`, value: total });
-      
-      // Add custom times
-      [5, 10, 15, 20, 30, 45, 60].forEach(min => {
-        if (!times.find(t => t.value === min)) {
-          times.push({ label: `${min} minuti`, value: min });
-        }
-      });
-      
-      times.sort((a, b) => a.value - b.value);
-      times.forEach(time => {
-        const option = document.createElement('option');
-        option.value = time.value;
-        option.textContent = time.label;
-        timerSelect.appendChild(option);
-      });
-      
-      if (cookingTime) {
-        timerSelect.value = cookingTime;
-      }
-    }
-    
     function startTimer() {
-      const minutes = parseInt(document.getElementById('timer-minutes').value);
-      if (!minutes) return;
+      if (!currentRecipe || !currentRecipe.cookTimeMinutes) return;
       
-      timerSeconds = minutes * 60;
-      timerPaused = false;
+      const primary = defaultConfig.primary_action_color;
+      const bg = defaultConfig.background_color;
+      const surface = defaultConfig.surface_color;
       
+      document.getElementById('start-timer-btn').classList.add('hidden');
       document.getElementById('timer-display').classList.remove('hidden');
-      document.getElementById('start-timer').disabled = true;
-      document.getElementById('start-timer').style.opacity = '0.5';
       
+      const timerDisplay = document.getElementById('timer-display');
+      timerDisplay.style.borderColor = primary;
+      timerDisplay.style.backgroundColor = primary + '10';
+      
+      const pauseBtn = document.getElementById('pause-timer');
+      const resetBtn = document.getElementById('reset-timer');
+      pauseBtn.style.backgroundColor = bg;
+      pauseBtn.style.color = defaultConfig.text_color;
+      resetBtn.style.backgroundColor = bg;
+      resetBtn.style.color = defaultConfig.text_color;
+      
+      timerSeconds = currentRecipe.cookTimeMinutes * 60;
+      timerPaused = false;
       updateTimerDisplay();
       
       timerInterval = setInterval(() => {
@@ -430,318 +817,202 @@
           
           if (timerSeconds === 0) {
             stopTimer();
-            showToast('⏰ Timer completato! Il tuo piatto è pronto!');
-            // Play notification (visual only since audio is not supported)
-            document.getElementById('timer-countdown').classList.add('timer-pulse');
-            setTimeout(() => {
-              document.getElementById('timer-countdown').classList.remove('timer-pulse');
-            }, 3000);
+            showToast('⏰ Timer terminato!');
           }
         }
       }, 1000);
     }
-    
+
     function updateTimerDisplay() {
       const minutes = Math.floor(timerSeconds / 60);
       const seconds = timerSeconds % 60;
       document.getElementById('timer-countdown').textContent = 
         `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      
-      document.getElementById('timer-status').textContent = 
-        timerPaused ? '⏸️ In pausa' : '⏱️ Timer attivo';
     }
-    
-    function pauseTimer() {
+
+    function togglePauseTimer() {
       timerPaused = !timerPaused;
       document.getElementById('pause-timer').textContent = timerPaused ? '▶️ Riprendi' : '⏸️ Pausa';
     }
-    
+
     function stopTimer() {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      timerSeconds = 0;
-      timerPaused = false;
-      
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
       document.getElementById('timer-display').classList.add('hidden');
-      document.getElementById('start-timer').disabled = false;
-      document.getElementById('start-timer').style.opacity = '1';
+      document.getElementById('start-timer-btn').classList.remove('hidden');
       document.getElementById('pause-timer').textContent = '⏸️ Pausa';
+      timerPaused = false;
     }
 
-    function viewRecipe(recipeId) {
-      const recipe = recipes.find(r => r.id === recipeId);
-      if (!recipe) return;
+    // Shopping list functions
+    function openShoppingList() {
+      if (!currentRecipe) return;
       
-      currentRecipe = recipe;
-      originalPortions = recipe.servings;
-      currentPortions = recipe.servings;
+      const primary = defaultConfig.primary_action_color;
+      const surface = defaultConfig.surface_color;
       
-      document.getElementById('view-name').textContent = recipe.name;
-      document.getElementById('view-category').textContent = recipe.category;
+      const ingredientsList = currentRecipe.ingredients.split('\n').filter(i => i.trim());
+      const scale = currentRecipe.baseServings ? currentServings / currentRecipe.baseServings : 1;
       
-      const difficultyEl = document.getElementById('view-difficulty');
-      const difficultyColors = {
-        'Facile': '#90EE90',
-        'Media': '#FFD700',
-        'Difficile': '#FF6347'
+      document.getElementById('shopping-list-items').innerHTML = ingredientsList
+        .map(ing => {
+          const scaled = scaleIngredient(ing, scale);
+          return `<li class="flex items-center gap-3 p-2 rounded">
+            <input type="checkbox" class="w-5 h-5 rounded">
+            <span>${escapeHtml(scaled)}</span>
+          </li>`;
+        })
+        .join('');
+      
+      document.getElementById('shopping-modal').classList.remove('hidden');
+    }
+
+    function closeShoppingModal() {
+      document.getElementById('shopping-modal').classList.add('hidden');
+    }
+
+    function copyShoppingList() {
+      if (!currentRecipe) return;
+      
+      const ingredientsList = currentRecipe.ingredients.split('\n').filter(i => i.trim());
+      const scale = currentRecipe.baseServings ? currentServings / currentRecipe.baseServings : 1;
+      const scaledList = ingredientsList.map(ing => `• ${scaleIngredient(ing, scale)}`).join('\n');
+      const text = `🛒 Lista della spesa - ${currentRecipe.title}\n\n${scaledList}`;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Lista copiata!');
+      }).catch(() => {
+        showToast('Impossibile copiare');
+      });
+    }
+
+    // CRUD Operations
+    async function saveRecipe(e) {
+      e.preventDefault();
+
+      if (recipes.length >= 999 && !document.getElementById('recipe-id').value) {
+        showToast('Limite di 999 ricette raggiunto!');
+        return;
+      }
+
+      const saveBtn = document.getElementById('save-btn');
+      const saveBtnText = document.getElementById('save-btn-text');
+      const spinner = document.getElementById('save-spinner');
+
+      saveBtn.disabled = true;
+      saveBtnText.textContent = 'Salvataggio...';
+      spinner.classList.remove('hidden');
+
+      const servings = parseInt(document.getElementById('recipe-servings').value) || 0;
+      const cookTime = document.getElementById('recipe-cook-time').value;
+      const cookTimeMinutes = extractMinutes(cookTime);
+      
+      const recipeData = {
+        id: document.getElementById('recipe-id').value || Date.now().toString(),
+        title: document.getElementById('recipe-title').value,
+        photoUrl: document.getElementById('recipe-photo').value,
+        category: document.getElementById('recipe-category').value,
+        servings: servings,
+        baseServings: servings,
+        prepTime: document.getElementById('recipe-prep-time').value,
+        cookTime: cookTime,
+        cookTimeMinutes: cookTimeMinutes,
+        ingredients: document.getElementById('recipe-ingredients').value,
+        instructions: document.getElementById('recipe-instructions').value,
+        notes: document.getElementById('recipe-notes').value,
+        createdAt: new Date().toISOString()
       };
-      difficultyEl.textContent = recipe.difficulty;
-      difficultyEl.style.backgroundColor = difficultyColors[recipe.difficulty];
-      difficultyEl.style.color = recipe.difficulty === 'Difficile' ? '#ffffff' : '#333333';
-      
-      document.getElementById('view-time').textContent = recipe.time;
-      
-      if (recipe.cookingTime) {
-        document.getElementById('view-cooking-time').textContent = recipe.cookingTime;
-        document.getElementById('view-cooking-time-container').classList.remove('hidden');
+
+      const existingId = document.getElementById('recipe-id').value;
+
+      if (existingId) {
+        const index = recipes.findIndex(r => r.id === existingId);
+        if (index !== -1) {
+          recipes[index] = recipeData;
+        }
       } else {
-        document.getElementById('view-cooking-time-container').classList.add('hidden');
+        recipes.push(recipeData);
       }
-      
-      document.getElementById('current-portions').textContent = currentPortions;
-      document.getElementById('original-portions').textContent = originalPortions;
-      
-      updateIngredientDisplay();
-      
-      document.getElementById('view-instructions').textContent = recipe.instructions;
-      
-      if (recipe.notes && recipe.notes.trim()) {
-        document.getElementById('view-notes').textContent = recipe.notes;
-        document.getElementById('view-notes-section').classList.remove('hidden');
-      } else {
-        document.getElementById('view-notes-section').classList.add('hidden');
-      }
-      
-      // Setup timer
-      setupTimer(recipe.cookingTime, recipe.time);
-      stopTimer(); // Reset any existing timer
-      
-      const viewModal = document.getElementById('view-modal');
-      viewModal.classList.remove('hidden');
-      viewModal.classList.add('flex');
-      
-      document.getElementById('edit-from-view-btn').onclick = () => {
-        closeViewModal();
-        openModal(recipeId);
-      };
-      
-      document.getElementById('delete-from-view-btn').onclick = () => {
-        closeViewModal();
-        confirmDelete(recipeId);
-      };
-    }
 
-    function closeViewModal() {
-      const modal = document.getElementById('view-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      stopTimer();
-      currentRecipe = null;
-    }
-
-    function confirmDelete(recipeId, event) {
-      if (event) {
-        event.stopPropagation();
-      }
-      
-      const recipe = recipes.find(r => r.id === recipeId);
-      const card = document.querySelector(`[data-id="${recipeId}"]`);
-      
-      if (card) {
-        const deleteBtn = card.querySelector('.delete-btn');
-        const originalContent = deleteBtn.innerHTML;
-        
-        deleteBtn.innerHTML = '✓';
-        deleteBtn.style.backgroundColor = '#90EE90';
-        
-        const cancelBtn = document.createElement('button');
-        cancelBtn.className = 'absolute top-4 right-14 w-8 h-8 rounded-full flex items-center justify-center transition-opacity';
-        cancelBtn.style.backgroundColor = '#d3d3d3';
-        cancelBtn.style.color = '#333333';
-        cancelBtn.innerHTML = '×';
-        cancelBtn.onclick = (e) => {
-          e.stopPropagation();
-          deleteBtn.innerHTML = originalContent;
-          deleteBtn.style.backgroundColor = '#cd5c5c';
-          cancelBtn.remove();
-        };
-        
-        card.appendChild(cancelBtn);
-        
-        deleteBtn.onclick = (e) => {
-          e.stopPropagation();
-          deleteRecipe(recipeId);
-          cancelBtn.remove();
-        };
-      }
-    }
-
-    function deleteRecipe(recipeId) {
-      recipes = recipes.filter(r => r.id !== recipeId);
-      saveRecipes();
+      saveRecipesToStorage();
       renderRecipes();
+      updateCategoryTabs();
+
+      saveBtn.disabled = false;
+      saveBtnText.textContent = 'Salva Ricetta';
+      spinner.classList.add('hidden');
+
+      closeModal();
+      showToast(existingId ? 'Ricetta aggiornata!' : 'Ricetta salvata!');
+    }
+
+    async function deleteRecipe() {
+      if (!currentRecipe) return;
+
+      if (!deleteConfirmMode) {
+        deleteConfirmMode = true;
+        document.getElementById('delete-btn-text').textContent = 'Conferma eliminazione?';
+        return;
+      }
+
+      const deleteBtn = document.getElementById('delete-recipe-btn');
+      deleteBtn.disabled = true;
+      document.getElementById('delete-btn-text').textContent = 'Eliminazione...';
+
+      recipes = recipes.filter(r => r.id !== currentRecipe.id);
+      saveRecipesToStorage();
+      renderRecipes();
+      updateCategoryTabs();
+
+      deleteBtn.disabled = false;
+      closeViewModal();
       showToast('Ricetta eliminata');
     }
 
-    function saveRecipe(event) {
-      event.preventDefault();
-      
-      const name = document.getElementById('recipe-name').value.trim();
-      const category = document.getElementById('recipe-category').value;
-      const time = parseInt(document.getElementById('recipe-time').value);
-      const cookingTime = parseInt(document.getElementById('recipe-cooking-time').value) || null;
-      const servings = parseInt(document.getElementById('recipe-servings').value);
-      const ingredients = document.getElementById('recipe-ingredients').value.trim();
-      const instructions = document.getElementById('recipe-instructions').value.trim();
-      const difficulty = document.getElementById('recipe-difficulty').value;
-      const notes = document.getElementById('recipe-notes').value.trim();
-      
-      if (editingRecipeId) {
-        const recipe = recipes.find(r => r.id === editingRecipeId);
-        recipe.name = name;
-        recipe.category = category;
-        recipe.time = time;
-        recipe.cookingTime = cookingTime;
-        recipe.servings = servings;
-        recipe.ingredients = ingredients;
-        recipe.instructions = instructions;
-        recipe.difficulty = difficulty;
-        recipe.notes = notes;
-        showToast('Ricetta aggiornata!');
-      } else {
-        recipes.push({
-          id: Date.now().toString(),
-          name,
-          category,
-          time,
-          cookingTime,
-          servings,
-          ingredients,
-          instructions,
-          difficulty,
-          notes
-        });
-        showToast('Ricetta aggiunta!');
-      }
-      
-      saveRecipes();
-      renderRecipes();
-      closeModal();
+    // Utility Functions
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
-    async function onConfigChange(config) {
-      document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
-      document.getElementById('add-button-text').textContent = config.add_button_text || defaultConfig.add_button_text;
-      document.getElementById('empty-state-text').textContent = config.empty_state_text || defaultConfig.empty_state_text;
-      
-      const appDiv = document.getElementById('app');
-      appDiv.style.backgroundColor = config.background_color || defaultConfig.background_color;
-      
-      const fontFamily = config.font_family || defaultConfig.font_family;
-      const fontSize = config.font_size || defaultConfig.font_size;
-      appDiv.style.fontFamily = `${fontFamily}, Georgia, serif`;
-      
-      document.getElementById('app-title').style.fontSize = `${fontSize * 3.125}px`;
-      document.getElementById('app-title').style.color = config.text_color || defaultConfig.text_color;
-      
-      const addBtn = document.getElementById('add-recipe-btn');
-      addBtn.style.backgroundColor = config.primary_button_color || defaultConfig.primary_button_color;
-      addBtn.style.fontSize = `${fontSize * 1.125}px`;
-      
-      renderRecipes();
-    }
-
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities: (config) => ({
-          recolorables: [
-            {
-              get: () => config.background_color || defaultConfig.background_color,
-              set: (value) => {
-                config.background_color = value;
-                window.elementSdk.setConfig({ background_color: value });
-              }
-            },
-            {
-              get: () => config.card_color || defaultConfig.card_color,
-              set: (value) => {
-                config.card_color = value;
-                window.elementSdk.setConfig({ card_color: value });
-              }
-            },
-            {
-              get: () => config.text_color || defaultConfig.text_color,
-              set: (value) => {
-                config.text_color = value;
-                window.elementSdk.setConfig({ text_color: value });
-              }
-            },
-            {
-              get: () => config.primary_button_color || defaultConfig.primary_button_color,
-              set: (value) => {
-                config.primary_button_color = value;
-                window.elementSdk.setConfig({ primary_button_color: value });
-              }
-            },
-            {
-              get: () => config.secondary_color || defaultConfig.secondary_color,
-              set: (value) => {
-                config.secondary_color = value;
-                window.elementSdk.setConfig({ secondary_color: value });
-              }
-            }
-          ],
-          borderables: [],
-          fontEditable: {
-            get: () => config.font_family || defaultConfig.font_family,
-            set: (value) => {
-              config.font_family = value;
-              window.elementSdk.setConfig({ font_family: value });
-            }
-          },
-          fontSizeable: {
-            get: () => config.font_size || defaultConfig.font_size,
-            set: (value) => {
-              config.font_size = value;
-              window.elementSdk.setConfig({ font_size: value });
-            }
-          }
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ['app_title', config.app_title || defaultConfig.app_title],
-          ['add_button_text', config.add_button_text || defaultConfig.add_button_text],
-          ['empty_state_text', config.empty_state_text || defaultConfig.empty_state_text]
-        ])
-      });
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      toastMessage.textContent = message;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
     }
 
     // Event Listeners
     document.getElementById('add-recipe-btn').addEventListener('click', () => openModal());
-    document.getElementById('close-modal').addEventListener('click', closeModal);
-    document.getElementById('cancel-btn').addEventListener('click', closeModal);
-    document.getElementById('close-view-modal').addEventListener('click', closeViewModal);
+    document.getElementById('add-first-recipe-btn').addEventListener('click', () => openModal());
     document.getElementById('recipe-form').addEventListener('submit', saveRecipe);
-    
-    document.getElementById('decrease-portions').addEventListener('click', () => updatePortions(-1));
-    document.getElementById('increase-portions').addEventListener('click', () => updatePortions(1));
-    
-    document.getElementById('start-timer').addEventListener('click', startTimer);
-    document.getElementById('pause-timer').addEventListener('click', pauseTimer);
-    document.getElementById('stop-timer').addEventListener('click', stopTimer);
-
-    document.getElementById('recipe-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'recipe-modal') closeModal();
+    document.getElementById('delete-recipe-btn').addEventListener('click', deleteRecipe);
+    document.getElementById('edit-recipe-btn').addEventListener('click', () => {
+      closeViewModal();
+      openModal(currentRecipe);
     });
+    
+    // New feature event listeners
+    document.getElementById('decrease-servings').addEventListener('click', () => changeServings(-1));
+    document.getElementById('increase-servings').addEventListener('click', () => changeServings(1));
+    document.getElementById('start-timer-btn').addEventListener('click', startTimer);
+    document.getElementById('pause-timer').addEventListener('click', togglePauseTimer);
+    document.getElementById('reset-timer').addEventListener('click', stopTimer);
+    document.getElementById('add-to-shopping-list').addEventListener('click', openShoppingList);
 
-    document.getElementById('view-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'view-modal') closeViewModal();
-    });
+    // Initialize
+    function init() {
+      applyDefaultStyles();
+      loadRecipes();
+    }
 
-    loadRecipes();
-    renderRecipes();
-    onConfigChange(defaultConfig);
+    init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b82c4e6d34de898',t:'MTc2NzQ0NjE3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c6b5b2e0515ed25',t:'MTc2OTg4NTAyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
