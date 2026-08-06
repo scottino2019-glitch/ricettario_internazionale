@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Source+Sans+3:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -158,6 +159,7 @@
     .h-32 { height: 8rem; }
     .h-64 { height: 16rem; }
     .h-80 { height: 20rem; }
+    .max-h-96 { max-height: 24rem; }
     .min-w-\[3rem\] { min-width: 3rem; }
     .max-w-xs { max-width: 20rem; }
 
@@ -447,15 +449,16 @@
          </span>
          <div class="flex items-center gap-2">
           <button id="toggle-pdf-preview-btn" type="button" onclick="togglePdfPreview()" class="text-xs px-3 py-1.5 rounded-full border-2 font-medium transition-colors hover:bg-gray-50 flex items-center gap-1">
-           👁️ Mostra PDF
+           👁️ Leggi PDF a schermo
           </button>
           <a id="download-pdf-btn" href="#" download="ricetta.pdf" class="text-xs px-3.5 py-1.5 rounded-full btn-primary font-medium flex items-center gap-1">
            ⬇️ Scarica PDF
           </a>
          </div>
         </div>
+        <!-- Canvas container for rendering PDF directly without auto-download -->
         <div id="pdf-preview-container" class="hidden mt-2">
-         <iframe id="pdf-iframe" class="w-full h-80 rounded-lg border shadow-inner" src=""></iframe>
+         <div id="pdf-canvas-container" class="w-full max-h-96 overflow-auto p-3 bg-gray-100 rounded-lg border shadow-inner flex flex-col items-center gap-3"></div>
         </div>
        </div>
 
@@ -554,6 +557,10 @@
   </div>
 
   <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
     const defaultConfig = {
       app_title: 'Ricettario Digitale',
       app_subtitle: 'La tua collezione personale di ricette sempre a portata di mano',
@@ -586,6 +593,18 @@
       'Dolci': '🍰',
       'Bevande': '🥤'
     };
+
+    // Helper to convert base64 dataUrl to Uint8Array for PDF rendering without triggers
+    function dataURLtoUint8Array(dataUrl) {
+      const base64 = dataUrl.split(',')[1];
+      const raw = window.atob(base64);
+      const rawLength = raw.length;
+      const array = new Uint8Array(new ArrayBuffer(rawLength));
+      for (let i = 0; i < rawLength; i++) {
+        array[i] = raw.charCodeAt(i);
+      }
+      return array;
+    }
 
     // Load recipes from localStorage
     function loadRecipes() {
@@ -912,8 +931,8 @@
         downloadBtn.download = recipe.pdfData.name || `${recipe.title}.pdf`;
         
         document.getElementById('pdf-preview-container').classList.add('hidden');
-        document.getElementById('pdf-iframe').src = '';
-        document.getElementById('toggle-pdf-preview-btn').textContent = '👁️ Mostra PDF';
+        document.getElementById('pdf-canvas-container').innerHTML = '';
+        document.getElementById('toggle-pdf-preview-btn').textContent = '👁️ Leggi PDF a schermo';
         
         hasAttachments = true;
       } else {
@@ -987,20 +1006,59 @@
       document.body.style.overflow = 'hidden';
     }
 
-    function togglePdfPreview() {
+    // Render PDF onto canvas without auto-downloading anything
+    async function renderPdfPreview(dataUrl) {
+      const container = document.getElementById('pdf-canvas-container');
+      container.innerHTML = '<div class="p-4 text-center text-sm opacity-70">Caricamento anteprima PDF in corso...</div>';
+
+      try {
+        if (!window.pdfjsLib) {
+          throw new Error('Libreria PDF non caricata');
+        }
+
+        const pdfData = dataURLtoUint8Array(dataUrl);
+        const loadingTask = window.pdfjsLib.getDocument({ data: pdfData });
+        const pdf = await loadingTask.promise;
+
+        container.innerHTML = '';
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const canvas = document.createElement('canvas');
+          canvas.className = 'max-w-full rounded shadow border bg-white my-1';
+
+          const viewport = page.getViewport({ scale: 1.2 });
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          container.appendChild(canvas);
+          await page.render({ canvasContext: context, viewport: viewport }).promise;
+        }
+      } catch (err) {
+        console.error('Errore rendering PDF:', err);
+        container.innerHTML = `
+          <div class="p-4 text-center text-sm text-red-600">
+            Impossibile visualizzare l'anteprima a schermo del PDF.<br>
+            Puoi comunque scaricarlo usando il pulsante "Scarica PDF".
+          </div>
+        `;
+      }
+    }
+
+    async function togglePdfPreview() {
       if (!currentRecipe || !currentRecipe.pdfData) return;
       const container = document.getElementById('pdf-preview-container');
-      const iframe = document.getElementById('pdf-iframe');
       const btn = document.getElementById('toggle-pdf-preview-btn');
 
       if (container.classList.contains('hidden')) {
         container.classList.remove('hidden');
-        iframe.src = currentRecipe.pdfData.dataUrl;
         btn.textContent = '🙈 Nascondi PDF';
+        await renderPdfPreview(currentRecipe.pdfData.dataUrl);
       } else {
         container.classList.add('hidden');
-        iframe.src = '';
-        btn.textContent = '👁️ Mostra PDF';
+        document.getElementById('pdf-canvas-container').innerHTML = '';
+        btn.textContent = '👁️ Leggi PDF a schermo';
       }
     }
 
